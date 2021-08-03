@@ -657,8 +657,12 @@ nav {
     text-align:center;
     }
 
-    #loading{
-        position: fixed;
+    .loadingPanel{
+        position: relative;
+    }
+
+    .loadingLogo{
+        position: absolute;
         z-index: 10;
         top: 0;
         left: 0;
@@ -674,13 +678,13 @@ nav {
         opacity: 0;
     }
     
-    #loading.active{
+    .loadingPanel.active .loadingLogo{
         /* transform: translateX(0); */
         transform: scale(1);
         opacity: 1;
     }
     
-    #loading span{
+    .loadingLogo span{
         font-size: 2rem;
         color: #fff;
         transform: scale(1);
@@ -696,6 +700,11 @@ nav {
         }
     }
 
+    .loadingPanel.active :not(.loadingLogo, .loadingLogo span, .loadingLogo img){
+        filter: blur(4px);
+        cursor: none;
+    }
+
     .popup{
         position: fixed;
         top: 2rem;
@@ -708,6 +717,7 @@ nav {
         border-radius: .5rem;
         transition: .5s;
         transform: translateY(calc(-100% + -2rem));
+        z-index: 12;
     }
     .popup.active{
         transform: translateY(0px);

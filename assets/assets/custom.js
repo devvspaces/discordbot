@@ -39,6 +39,44 @@ try{
 }
 
 
+// js
+var delay = document.getElementById('delay');
+var delay_display = document.getElementById('delay_display');
+// delay_display.innerHTML = delay.value + 's';
+
+delay.oninput = function() {
+    delay_display.innerHTML = delay.value + 's';
+}
+
+function showBlackListSettings() {
+    document.getElementById('blacklist-list').style.display = 'none';
+    document.getElementById('blacklist-settings').style.display = 'block';
+}
+function hideBlackListSettings() {
+    document.getElementById('blacklist-list').style.display = '';
+    document.getElementById('blacklist-settings').style.display = '';
+}
+
+function start() {
+    $('#startstop').html('<div class="loading"></div>')
+
+    setTimeout(function() {
+        $('#startstop').html('Stop')
+        $('#startstop').attr('onclick', 'stop();')
+
+    }, 3000);
+}
+
+function stop() {
+    $('#startstop').html('<div class="loading"></div>')
+
+    setTimeout(function() {
+        $('#startstop').html('Start')
+        $('#startstop').attr('onclick', 'start();')
+    }, 3000);
+}
+
+
 // Codes for popup messages
 let popup = $('.popup')
 function togglePopup(message){
@@ -50,32 +88,56 @@ function togglePopup(message){
 }
 
 let connect_server_btns = document.querySelectorAll('.connect_server')
+let remove_server_btns = document.querySelectorAll('.remove_server')
 
-// Clicking connect_server_btn
+// Clicking connect_server_btn and remove server event ajax
 function clickServerConnect(e) {
     // GEt the connect uid
     e.preventDefault()
-    connect_id = e.target.getAttribute('connect_id')
-    
-    loadStart()
+    connect_id = e.target.parentElement.getAttribute('connect_id')
+
+    // Know which kind of request to make (connect/remove)
+    let req_type = 'connect'
+    if (e.target.classList.contains('remove_server')){
+        req_type = 'remove'
+
+        // Confirm user wants to remove server
+        let confimation = confirm("Are you sure to remove this server?")
+
+        if (confimation == false){
+            return
+        }
+    }  
 
     // Create a string in serializable format and send with ajax
-    let serverLink = 'connect_id='+connect_id
+    let serverLink = 'connect_id='+connect_id+'&req_type='+req_type
 
     let thisURL = window.location.href // or set your own url
+
+    loadStart('#serverAdding')
 
     $.ajax({
         method: "POST",
         url: thisURL,
         data: serverLink,
-        success: function (data, textStatus, jqXHR){
-            loadStop()
+        success: function (data){
+            loadStop('#serverAdding')
+
+            if (req_type=='remove'){
+                e.target.parentElement.parentElement.remove()
+            }
             
             // Get message display on popup
             message = data['message']
             togglePopup(message)
         },
-        error: handleError,
+        error: function (jqXHR) {
+            loadStop('#serverAdding')
+
+            // Get message display on popup
+            let message = jqXHR['responseJSON']['message']
+            togglePopup(message)
+        },
     })
 }
 
@@ -85,38 +147,39 @@ function listenToConnectBtns() {
     connect_server_btns.forEach(i=>{
         i.addEventListener('click', clickServerConnect)
     })
-
 }
 
 listenToConnectBtns()
 
-let loading = $('#loading')
-
-function loadStart(){
-    loading.addClass('active')
-    $('body').css('overflow', 'hidden')
-    $('#sidenav').css('filter', 'blur(12px)')
-    $('#board').css('filter', 'blur(12px)')
-    $('nav').css('filter', 'blur(12px)')
+// Code for remove_server
+function listenToRemoveBtns() {
+    remove_server_btns = document.querySelectorAll('.remove_server')
+    remove_server_btns.forEach(i=>{
+        i.addEventListener('click', clickServerConnect)
+    })
 }
 
-function loadStop(){
-    loading.removeClass('active')
-    $('body').css('overflow', 'auto')
-    $('#sidenav').css('filter', 'blur(0)')
-    $('#board').css('filter', 'blur(0)')
-    $('nav').css('filter', 'blur(0)')
+listenToRemoveBtns()
+
+function loadStart(panel){
+    loading = document.querySelector(panel)
+    $(loading).addClass('active')
+    $(loading).css('overflow', 'hidden')
 }
 
-let serverList = $('#server-list')
-let noServers = $('#no_servers')
+function loadStop(panel){
+    loading = document.querySelector(panel)
+    $(loading).removeClass('active')
+    $(loading).css('overflow', 'auto')
+}
+
 let addServer = $('#addServer')
 let discord_server_invite_link = $("input[name='discord_server_invite_link']")
 
 addServer.click(function(event){
     event.preventDefault()
     
-    loadStart()
+    loadStart('#serverAdding')
 
     // Create a string in serializable format and send with ajax
     let serverLink = 'discord_server_invite_link='+discord_server_invite_link[0].value
@@ -132,25 +195,15 @@ addServer.click(function(event){
     })
 })
 
-
-// function handleRedirect(data, textStatus, jqXHR){
-// 	console.log(data)
-//     console.log(textStatus)
-//     console.log(jqXHR)
-//     // Get redirect information and change windows location
-//     redirect = data['redirect']
-//     window.location.href = 'http://'+redirect
-// }
-
 function handleSuccess(data, textStatus, jqXHR){
-    loadStop()
+    loadStop('#serverAdding')
 
     let message = data['message']
     data = data['object']
 
     // remover the no servers content
     try {
-        noServers.remove()
+        $('#no_servers').remove()
     } catch (e) {
         
     }
@@ -178,19 +231,24 @@ function handleSuccess(data, textStatus, jqXHR){
     e_td_members.appendChild(e_label)
 
     e_btn_1.className = 'red'
+    e_btn_2.classList.add('remove_server')
     e_btn_1.setAttribute('type', 'button')
     e_btn_1.textContent = 'Remove'
-    e_btn_2.className = 'green'
+
+    e_btn_2.classList.add('green')
+    e_btn_2.classList.add('connect_server')
     e_btn_2.setAttribute('type', 'button')
     e_btn_2.textContent = 'Connect'
+
     e_td_buttons.appendChild(e_btn_1)
     e_td_buttons.appendChild(e_btn_2)
+    e_td_buttons.setAttribute('connect_uid', data['uid'])
 
     e_tr.appendChild(e_td_name)
     e_tr.appendChild(e_td_members)
     e_tr.appendChild(e_td_buttons)
 
-    serverList.append(e_tr)
+    $('#server-list').append(e_tr)
 
     togglePopup(message)
 
@@ -198,10 +256,112 @@ function handleSuccess(data, textStatus, jqXHR){
 }
 
 function handleError(jqXHR, textStatus, errorThrown){
-    loadStop()
+    loadStop('#serverAdding')
 
     let message = jqXHR['responseJSON']['message']
     togglePopup(message)
+}
 
-    console.log(jqXHR)
+
+// Code to add blacklists
+function upload(event) {
+    event.preventDefault();
+    var data = new FormData($('#blacklist-settings').get(0));
+    
+    loadStart('#blacklistAdding')
+    $.ajax({
+        url: window.location.href,
+        type: $(this).attr('method'),
+        data: data,
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: handleAddBlacklist,
+        error: function (jqXHR) {
+            loadStop('#blacklistAdding')
+
+            // Get message display on popup
+            let message = jqXHR['responseJSON']['message']
+            togglePopup(message)
+        },
+    });
+    return false;
+}
+
+function handleAddBlacklist(data, textStatus, jqXHR){
+    loadStop('#blacklistAdding')
+
+    let message = data['message']
+    data = data['object']
+
+    // remover the no servers content
+    try {
+        $('#no_bl').remove()
+    } catch (e) {
+        
+    }
+
+    // Create element
+    let e_tr = document.createElement('tr')
+    let e_p = document.createElement('p')
+    let e_img = document.createElement('img')
+    let e_label = document.createElement('label')
+    let e_btn_1 = document.createElement('button')
+    let e_btn_2 = document.createElement('button')
+    let e_td_name = document.createElement('td')
+    let e_td_members = document.createElement('td')
+    let e_td_buttons = document.createElement('td')
+
+    e_img.src = 'https://www.clipartmax.com/png/small/246-2468580_blacklist-the-blacklist.png'
+    e_p.textContent = data['name']
+    e_p.style.margin = '0px'
+    e_p.style.display = 'inline'
+    e_td_name.appendChild(e_img)
+    e_td_name.appendChild(e_p)
+
+    e_td_members.textContent = data['members']+' '
+    e_label.className = 'avatar-icon'
+    e_td_members.appendChild(e_label)
+
+    e_btn_1.className = 'red'
+    e_btn_2.classList.add('remove_blacklist')
+    e_btn_1.setAttribute('type', 'button')
+    e_btn_1.textContent = 'Remove'
+
+    e_btn_2.classList.add('green')
+    e_btn_2.classList.add('select_blacklist')
+    e_btn_2.setAttribute('type', 'button')
+    e_btn_2.textContent = 'Select'
+
+    e_td_buttons.appendChild(e_btn_1)
+    e_td_buttons.appendChild(e_btn_2)
+    e_td_buttons.setAttribute('blacklist_uid', data['uid'])
+
+    e_tr.appendChild(e_td_name)
+    e_tr.appendChild(e_td_members)
+    e_tr.appendChild(e_td_buttons)
+
+    $('#black_list').append(e_tr)
+
+    togglePopup(message)
+
+    // listenToConnectBtns()
+
+    document.getElementById('blacklist-list').style.display = 'none';
+    document.getElementById('blacklist-settings').style.display = 'block';
+
+    hideBlackListSettings();
+}
+
+let addBlacklistForm = document.querySelector('#blacklist-settings')
+addBlacklistForm.addEventListener('submit', upload)
+
+function confirmBlackListSettings(e) {
+    // document.getElementById('blacklist-list').style.display = 'none';
+    // document.getElementById('blacklist-settings').style.display = 'block';
+
+    //Submits form to ajax
+    $('#blacklist-settings').submit()
+
+    // 
 }

@@ -11,6 +11,9 @@ class BlacklistParent(models.Model):
 
     def count_list(self):
         return self.blacklist_set.count()
+    
+    def gen_name(self):
+        return f'Blacklist-{self.created.year}-{self.created.month}-{self.created.day}-{self.created.hour}:{self.created.second}'
 
     def __str__(self):
         return str(self.uid)

@@ -1,5 +1,7 @@
 {% extends 'mainapp/base.html' %}
 {% load static %}
+{% load humanize %}
+
 {% block contents %}
 <div id="board">
     <div class="statistics">
@@ -18,7 +20,7 @@
 
     <textarea placeholder="Enter a message"></textarea>
 
-    <div class="table" style="width:490px;height:200px;float:right;">
+    <div id='serverAdding' class="table loadingPanel" style="width:490px;height:200px;float:right;">
         <input class="search" type="text" name="discord_server_invite_link" placeholder="Enter server invite" />
         <button id='addServer' class="green submit-button" type="button">Add server</button>
 
@@ -34,45 +36,46 @@
                 {% for server in listed_servers %}
                 <tr>
                     <td><img src="{{ server.icon }}" alt="">{{ server.name }}</td>
-                    <td>{{ server.members }} <label class="avatar-icon"></label></td>
-                    <td><button class="red" type="button" onclick="">Remove</button><button class="connect_server green" type="button" connect_id="{{ server.uid }}">Connect</button></td>
+                    <td>{{ server.members|intcomma }} <label class="avatar-icon"></label></td>
+                    <td connect_id="{{ server.uid }}"><button class="remove_server red" type="button" onclick="">Remove</button><button class="connect_server green" type="button">Connect</button></td>
                 </tr>
                 {% endfor %}
 
             </tbody>
         </table>
+        <div class="loadingLogo">
+            <span><img src="{% static 'assets/images/logo.png' %}" alt=""></span>
+        </div>
     </div>
 
-    <div class="table" style="width:490px;height:200px;float:right;">
+    <div id='blacklistAdding' class="table loadingPanel" style="width:490px;height:200px;float:right;">
         <div id="blacklist-list">
             <button class="green submit-button" onclick="showBlackListSettings();" type="button">Add Blacklist</button>
 
             <table style="height:calc(100% - 60px);margin-top:60px;">
-            <tbody>
+            <tbody id="black_list">
 
-                <!-- <td>No blacklist added yet</td> -->
+                {% if blacklists.count == 0 %}
+                    <td id="no_bl">No blacklist added yet</td>
+                {% endif %}
 
-                <tr>
-                    <td><img src="" alt="discord server logo"> Someone's Blacklist</td>
-                    <td>10,265 <label class="avatar-icon"></label></td>
-                    <td><button class="red" type="button" onclick="">Remove</button><button class="green" type="button" onclick="">Select</button></td>
-                </tr>
+                {% for i in blacklists %}
+                    <tr>
+                        <td><img src="https://www.clipartmax.com/png/small/246-2468580_blacklist-the-blacklist.png" alt="lunar promos blacklist">{{ i.gen_name }}</td>
+                        <td>{{ i.count_list|intcomma }} <label class="avatar-icon"></label></td>
+                        <td blacklist_uid="{{ i.uid }}"><button class="red remove_blacklist" type="button" onclick="">Remove</button><button class="green select_blacklist" type="button" onclick="">Select</button></td>
+                    </tr>
+                {% endfor %}
 
             </tbody>
         </table>
         </div>
-        <div id="blacklist-settings">
+        <form id="blacklist-settings" method='POST'>
             <span style="display:block;text-align:center;margin:-10px auto 10px -50px;">Blacklist methods</span>
 
             <div class="method">
                 <span>Blacklist a server</span>
                 <input type="text" name="blacklist_server" placeholder="Enter server invite"/>
-            </div>
-
-            <div class="method">
-                <span>Blacklist user IDs</span>
-                <input id="blacklist_user_id" type="file" name="blacklist_user_id" accept="text/plain"/>
-                <div class="input-file" onclick="document.getElementById('blacklist_user_id').click();">Select a file (.txt)</div>
             </div>
 
             <div class="method">
@@ -83,8 +86,11 @@
 
             <div style="position:absolute;bottom:30px;left:0;right:0;text-align:center;margin-left: -55px;">
                 <button class="red submit-button" onclick="hideBlackListSettings();" type="button" style="float:none;margin-right:10px;">Back</button>
-                <button class="green submit-button" onclick="confirmBlackListSettings();" type="button" style="float:none;">Confirm</button>
+                <button type='submit' class="green submit-button" onclick="" type="button" style="float:none;">Confirm</button>
             </div>
+        </form>
+        <div class="loadingLogo">
+            <span><img src="{% static 'assets/images/logo.png' %}" alt=""></span>
         </div>
     </div>
 
@@ -128,49 +134,4 @@
         </div>
     </div>
 </div>
-<script>
-    var delay = document.getElementById('delay');
-    var delay_display = document.getElementById('delay_display');
-    // delay_display.innerHTML = delay.value + 's';
-
-    delay.oninput = function() {
-        delay_display.innerHTML = delay.value + 's';
-    }
-
-    function showBlackListSettings() {
-        document.getElementById('blacklist-list').style.display = 'none';
-        document.getElementById('blacklist-settings').style.display = 'block';
-    }
-    function hideBlackListSettings() {
-        document.getElementById('blacklist-list').style.display = '';
-        document.getElementById('blacklist-settings').style.display = '';
-    }
-    function confirmBlackListSettings() {
-        document.getElementById('blacklist-list').style.display = 'none';
-        document.getElementById('blacklist-settings').style.display = 'block';
-
-        //add blacklist to table
-
-        hideBlackListSettings();
-    }
-
-    function start() {
-        $('#startstop').html('<div class="loading"></div>')
-
-        setTimeout(function() {
-            $('#startstop').html('Stop')
-            $('#startstop').attr('onclick', 'stop();')
-
-        }, 3000);
-    }
-
-    function stop() {
-        $('#startstop').html('<div class="loading"></div>')
-
-        setTimeout(function() {
-            $('#startstop').html('Start')
-            $('#startstop').attr('onclick', 'start();')
-        }, 3000);
-    }
-</script>
 {% endblock contents %}

@@ -9,7 +9,7 @@ from paygate.coinbase_client import coinbase_api
 
 from .main.driver import Driver
 
-from .models import DiscordServer, DirectMessage
+from .models import Blacklist, DiscordServer, DirectMessage, BlacklistParent
 
 
 class Dashboard(LoginRequiredMixin, TemplateView):
@@ -78,6 +78,7 @@ class DmPanel(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context["listed_servers"] = self.request.user.discordserver_set.all()
         context['messages_left'] = Order.objects.filter(profile=self.request.user.profile).count_dm() - DirectMessage.objects.filter().count_sent()
+        context['blacklists'] = BlacklistParent.objects.filter(user = self.request.user)
         return context
     
     def get_driver(self):
@@ -101,12 +102,12 @@ class DmPanel(LoginRequiredMixin, TemplateView):
 
         listed_servers = context['listed_servers']
 
-        # time.sleep(10)
-
         if request.is_ajax():
             # Identify which codes will be processed
             discord_server_invite_link = request.POST.get('discord_server_invite_link')
             connect_id = request.POST.get('connect_id')
+            d_file = request.FILES.get('blacklist_user_id')
+            d_server_link = request.POST.get('blacklist_server')
 
             if discord_server_invite_link:
                 # Get discord name and save
@@ -138,23 +139,68 @@ class DmPanel(LoginRequiredMixin, TemplateView):
                             server.delete()
                             return self.json_err_response(response)
 
-                return JsonResponse({'data': 'success', 'message':'Server has been succesfully added', 'object': {'name': server.name, 'members': server.members, 'icon': server.icon}}, status=200)
+                return JsonResponse({
+                    'data': 'success',
+                    'message':'Server has been succesfully added',
+                    'object': {
+                        'name': server.name,
+                        'members': server.members,
+                        'icon': server.icon,
+                        'uid': str(server.uid)
+                    }
+                }, status=200)
+
             elif connect_id:
                 # Verify the connect_id
-                discord_server = get_object_or_404(DiscordServer, uid=connect_id)
+                try:
+                    discord_server = DiscordServer.objects.get(uid=connect_id)
+                except DiscordServer.DoesNotExist:
+                    return self.json_err_response('')
 
-                # Get usable driver and parse out users
-                driver_instance = self.get_driver()
-                response = driver_instance.parse_users(discord_server)
+                # Know which request was sent
+                req_type = request.POST.get('req_type')
 
-                if response != True:
-                    return self.json_err_response(response)
+                if req_type == 'connect':
+                    # Get usable driver and parse out users
+                    driver_instance = self.get_driver()
+                    response = driver_instance.parse_users(discord_server)
+
+                    if response != True:
+                        return self.json_err_response(response)
+                    
+                    if driver_instance not in drivers:
+                        drivers.append(driver_instance)
+                    
+                    return JsonResponse({
+                        'data': 'success',
+                        'message':f'Server has been parsed, {discord_server.member_set.count()} members parsed to receive messages'}, status=200)
+
+                elif req_type == 'remove':
+                    discord_server.delete()
+                    return JsonResponse({
+                        'data':'success',
+                        'message': f'Discord server {discord_server.name} is successfully removed'}, status=200)
+            
+            elif d_file or d_server_link:
+                time.sleep(3)
+                if d_file:
+                    usernames = set(d_file.read().decode().strip().split())
+                    # Create blacklist with usernames
+                    blacklist_parent = BlacklistParent.objects.create(user=self.request.user)
+                    for i in usernames:
+                        blacklist_parent.blacklist_set.create(username=i)
+                if d_server_link:
+                    print(d_server_link)
                 
-                if driver_instance not in drivers:
-                    drivers.append(driver_instance)
-                
-                return JsonResponse({'data': 'success', 'message':f'Server has been parsed, {discord_server.member_set.count()} members parsed to receive messages'}, status=200)
-
+                return JsonResponse({
+                    'data': 'success',
+                    'message': 'Added the blacklist',
+                    'object': {
+                        'name': blacklist_parent.gen_name(),
+                        'members': blacklist_parent.count_list(),
+                        'uid': str(blacklist_parent.uid)
+                    }}, status=200)
+            
         return render(request, self.template_name, context)
     
     def json_err_response(self, response):
