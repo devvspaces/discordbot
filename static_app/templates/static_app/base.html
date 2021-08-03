@@ -1,0 +1,118 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Metas -->
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="generator" content="Mobirise v5.3.9, mobirise.com">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+
+    <!-- Title/Icons -->
+    {% if title %}
+        <title>Lunar Promos - {{title}}</title>
+    {% else %}
+        <title>Lunar Promos</title>
+    {% endif %}
+    <link rel="shortcut icon" href="{% static 'assets/images/favicon.png' %}" type="image/x-icon">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'assets/web/assets/mobirise-icons2/mobirise2.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/tether/tether.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/bootstrap/css/bootstrap-grid.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/bootstrap/css/bootstrap-reboot.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/dropdown/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/socicon/css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/theme/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/main.css' %}">
+    <link rel="preload"
+        href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,400;0,700;1,400;1,700&display=swap&display=swap"
+        as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,400;0,700;1,400;1,700&display=swap&display=swap">
+    </noscript>
+    <link rel="preload" as="style" href="{% static 'assets/mobirise/css/mbr-additional.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/mobirise/css/mbr-additional.css' %}" type="text/css">
+
+</head>
+<body>
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{message}}
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Landing Section -->
+    <section class="menu menu1 cid-sDw3lEFgkE" once="menu" id="menu1-2">
+        <nav class="navbar navbar-dropdown navbar-fixed-top navbar-expand-lg">
+            <div class="container">
+                <div class="navbar-brand" style="padding:0;">
+                    <span class="navbar-caption-wrap">
+                        <a class="navbar-caption text-white display-7" href="/"><img src="{% static 'assets/images/logo.png' %}" alt="logo" /></a>
+                    </span>
+                </div>
+                <button class="navbar-toggler" type="button" data-toggle="collapse"
+                    data-target="#navbarSupportedContent" aria-controls="navbarNavAltMarkup" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                    <div class="hamburger">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </button>
+                    <ul class="navbar-nav nav-dropdown" data-app-modern-menu="true" style="margin-left:-120px;">
+                        <li class="nav-item"><a class="nav-link link text-white display-4" style="font-size: 15px;" href="/">
+                                Home</a></li>
+                        <li class="nav-item"><a class="nav-link link text-white display-4" style="font-size: 15px;" href="{% url 'basic:pricing' %}">
+                                Pricing</a></li>
+                        <li class="nav-item"><a class="nav-link link text-white display-4" style="font-size: 15px;"
+                                href="">About Us</a>
+                        </li>
+                        <li class="nav-item"><a class="nav-link link text-white display-4" style="font-size: 15px;"
+                            href="">FAQ</a>
+                        </li>
+                        <li class="nav-item"><a class="nav-link link text-white display-4" style="font-size: 15px;"
+                            href="#contactsection">Contact</a>
+                        </li>
+                    </ul>
+
+                        <a class="button" href="{% url 'account:login' %}" style="margin-right:-155px;">Login</a>
+            </div>
+        </nav>
+    </section>
+
+    {% block content %}
+    {% endblock content %}
+
+    <!-- Footer -->
+    <section class="footer1 cid-sDw3zpybEX" once="footers" id="footer1-4" style="padding:0;background-color:#261f47;">
+        <div class="container">
+            <div class="col-12 col-md-6 col-lg-4" style="margin:auto;text-align:center;">
+                <p class="mbr-text mbr-fonts-style mb-4 display-12" style="margin-bottom:0!important;padding-bottom:20px;">© 2021 Lunar promos. All rights reserved.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Margins -->
+    <section
+        style="display:none;">
+        <a href="https://mobirise.site"></a>
+    </section>
+
+    <!-- Scripts -->
+    <script src="{% static 'assets/web/assets/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'assets/popper/popper.min.js' %}"></script>
+    <script src="{% static 'assets/tether/tether.min.js' %}"></script>
+    <script src="{% static 'assets/bootstrap/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'assets/smoothscroll/smooth-scroll.js' %}"></script>
+    <script src="{% static 'assets/dropdown/js/nav-dropdown.js' %}"></script>
+    <script src="{% static 'assets/dropdown/js/navbar-dropdown.js' %}"></script>
+    <script src="{% static 'assets/touchswipe/jquery.touch-swipe.min.js' %}"></script>
+    <script src="{% static 'assets/theme/js/script.js' %}"></script>
+</body>
+</html>

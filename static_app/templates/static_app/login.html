@@ -1,0 +1,16 @@
+{% extends 'static_app/base.html' %}
+{% load static %}
+{% block content %}
+    <section id="login-page" style="min-height:400px">
+        <div class="container">
+            <form class="box" action="index.html" method="post">
+                <h1> Login </h1>
+                <input type="text" name="" placeholder="Username or Email">
+                <p class="text-danger error-text">Error might be here</p>
+                <input type="password" name="" placeholder="Password">
+                <p class="text-danger error-text">Error might be here</p>
+                <input type="submit" name="" placeholder="Login">
+            </form>
+        </div>
+    </section>
+{% endblock content %}

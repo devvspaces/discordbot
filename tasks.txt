@@ -1,0 +1,22 @@
+# set the user admin form settings ##################################################
+# create validator for the uniqueness for discord_usernames
+# reaserch on bot creation to see how to validate a discord_username
+# set email sending information
+# integrate user login and signup codes ##################################################
+# integrate shopify api to get information about packages
+# integrate coinbase oauth
+# integrate coinbase commerce payment
+# request html pages
+# simulate a complete successfull discord account login and server scraping
+# change all texts 'demolunar' to the real web app's name
+
+shuffle solve swamp
+
+shoulder survey armor
+
+spider update film
+
+edge master snake
+
+
+API KEY: 6e6cd68f-896a-4156-9995-7c64c6f71bcf

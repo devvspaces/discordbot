@@ -1,0 +1,141 @@
+body {
+    font-size: 15px;
+    background: #261f47;
+    }
+    @keyframes shake {
+      0% { transform: translate(0px, 0px) rotate(0deg); }
+      20% { transform: translate(0px, 0px) rotate(-1deg); }
+      40% { transform: translate(-1px, -1px) rotate(0deg); }
+      60% { transform: translate(0px, 0px) rotate(1deg); }
+      80% { transform: translate(1px, 1px) rotate(0deg); }
+      90% { transform: translate(0px, 0px) rotate(-1deg); }
+      100% { transform: translate(0px, 0px) rotate(0deg); }
+    }
+    ::-webkit-scrollbar {
+        width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+        background: #312A50;
+        }
+        ::-webkit-scrollbar-thumb {
+        background: #595178;
+        border-radius: 4px;
+    }
+    .button {
+        padding: 10px 20px;
+        background: linear-gradient(to right, #B666D2, #EC609D);
+        display: inline-block!important;
+        border-radius: 20px;
+        color: #FFFFFF!important;
+        transition: .2s;
+        }
+        .button:hover {
+        padding: 10px 22px;
+        }
+        .button:hover + .button-backdrop {
+        padding: 5px;
+        top: -40px;
+        }
+        .button img {
+        vertical-align: middle
+        }
+
+    .plan .button {
+    margin-top: 30px;
+    }
+
+    .container {
+        max-width: 1520px!important;
+    }
+    .navbar img {
+    transition: .2s;
+    padding: 10px 0
+    }
+    .navbar.navbar-short img {
+    width: 50px;
+    }
+    .plan {
+    max-width: 300px;
+    margin: auto auto 100px auto;
+    padding: 20px;
+    border: 1px solid #FFFFFF;
+    border-radius: 20px;
+    }
+    .plan:hover {
+    animation: shake 4s;
+    animation-iteration-count: infinite;
+    }
+    .plan-header strong {
+    font-size: 25px;
+    }
+    .plan-list span {
+    display: block;
+    margin-bottom: 20px;
+    /* text-align: left; */
+    }
+    .green {
+    color: #46716A;
+    }
+
+
+#header2-3{
+    background-color: transparent;
+}
+#header2-3 .container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+}
+.box{
+  padding: 30px;
+  text-align: center;
+}
+.box h1{
+  color: white;
+  text-transform: uppercase;
+  font-weight: 500;
+  margin-bottom: 2rem;
+}
+.box .error-text{
+    font-size: .8rem;
+    margin-top: .5rem;
+}
+.box input[type = "text"],.box input[type = "password"]{
+  border: 0;
+  background: none;
+  display: block;
+  margin: 2px auto;
+  text-align: center;
+  border: 2px solid #3498db;
+  padding: 14px 10px;
+  width: 200px;
+  outline: none;
+  color: white;
+  border-radius: 2rem;
+  transition: 0.25s;
+}
+.box input[type = "text"]:focus,.box input[type = "password"]:focus{
+  width: 280px;
+  border-color: #EC609D;
+}
+.box input[type = "submit"]{
+  border: 0;
+  background: none;
+  display: block;
+  margin: 20px auto;
+  text-align: center;
+  border: 2px solid #2ecc71;
+  padding: 14px 40px;
+  outline: none;
+  color: white;
+  border-radius: 2rem;
+  transition: .25s;
+  cursor: pointer;
+}
+.box input[type = "submit"]:hover{
+  background: #EC609D;
+  border-color: transparent;
+  transition: .5s;
+}

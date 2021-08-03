@@ -1,0 +1,25 @@
+{% extends 'mainapp/base.html' %}
+{% load static %}
+{% block contents %}
+
+        <div id="board">
+
+            <span class="title">Packages</span>
+
+            <div class="table" style="height:calc(100% - 115px);">
+
+                {% for i in packages %}
+                <div class="package">
+                    <span>{{i.name}}</span>
+
+                    <div class="package-button">
+                        <a class="button" href="?checkout={{ i.id }}">${{i.local_price.amount}}</a>
+                        <label class="button-backdrop" style="width:80px;height:40px;"></label>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <p class="text">All orders go through a trusted payment gateway (coinbase.com)<br>By any package, you agree to our <a href="mailto:support@lunar-promos.com" style="color:#CCCCCC;text-decoration:underline;">terms of service</a>.</p>
+
+            </div>
+{% endblock contents %}

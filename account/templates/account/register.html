@@ -1,0 +1,45 @@
+{% extends 'static_app/base.html' %}
+{% load static %}
+{% block content %}
+    <section id="login-page" style="min-height:400px">
+        <div class="container">
+            <h1>Create new account</h1>
+            <form class="box" action="" method="post">
+                {% csrf_token %}
+
+                <fieldset>
+                    <input type="text" name="username" placeholder="Username">
+                    {% for i in form.username.errors %}
+                        <p class="text-danger error-text">{{i}}</p>
+                    {% endfor %}
+                </fieldset>
+
+                <fieldset>
+                    <input type="email" name="email" placeholder="Email">
+                    {% for i in form.email.errors %}
+                        <p class="text-danger error-text">{{i}}</p>
+                    {% endfor %}
+                </fieldset>
+
+                <fieldset>
+                    <input type="password" name="password" placeholder="Password">
+                    {% for i in form.password.errors %}
+                        <p class="text-danger error-text">{{i}}</p>
+                    {% endfor %}
+                </fieldset>
+
+                <fieldset>
+                    <input type="password" name="confirm_password" placeholder="Confirm Password">
+                    {% for i in form.confirm_password.errors %}
+                        <p class="text-danger error-text">{{i}}</p>
+                    {% endfor %}
+                </fieldset>
+
+                <button>Register</button>
+
+                <p class='info'>Already have an account? <a href="{% url 'account:login' %}">Log in</a></p>
+            </form>
+        </div>
+    </section>
+{% endblock content %}
+

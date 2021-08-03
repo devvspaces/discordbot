@@ -1,0 +1,85 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <!-- <meta name="Keywords" content="KEYWORDS HERE (SEPERATE WITH COMMA)" lang="en" xml:lang="en"> -->
+        <!-- <meta name="Description" content="DESCRIPTION HERE" lang="en" xml:lang="en"> -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link rel="icon" type="image/png" href="{% static 'assets/images/favicon.png' %}">
+
+        {% if title %}
+            <title>{{title}} | Lunar Promos</title>
+        {% else %}
+            <title>Lunar Promos</title>
+        {% endif %}
+
+        <link rel="stylesheet" href="{% static 'assets/style.css' %}">
+
+        <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> -->
+        <script src="{% static 'assets/web/assets/jquery/jquery.min.js' %}"></script>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+        <link rel="preload"
+        href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,400;0,700;1,400;1,700&display=swap&display=swap"
+        as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript>
+            <link rel="stylesheet"
+                href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,400;0,700;1,400;1,700&display=swap&display=swap">
+        </noscript>
+
+        <script>
+            $('body').css('animation-duration: 0s !important;-webkit-animation-duration: 0s !important;transition:background-color 0s, opacity 0s, color 0s, width 0s, height 0s, padding 0s, margin 0s !important;')
+        </script>
+    </head>
+
+    <body class="dashboard">
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{message}}
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="popup">
+            <span class="close"><i class="fas fa-times"></i></span>
+            <p>There will be some message here.</p>
+        </div>
+        <div id="loading">
+        <span><img src="{% static 'assets/images/logo.png' %}" alt=""></span>
+        </div>
+        <nav>
+            <a href="/"><img src="{% static 'assets/images/logo.png' %}" alt="logo" /></a>
+        </nav>
+
+        <div id="sidenav">
+            <span>{{ request.user.email }}</span>
+            <a class="small-text" href="{% url 'account:logout' %}">Logout</a>
+
+            <div class="list">
+                <a class="white" href="{% url 'dashboard:home' %}">Dashboard</a>
+                <a href="{% url 'dashboard:dm_panel' %}">DM Panel</a>
+                <a href="{% url 'dashboard:support' %}">Support</a>
+                <a href="{% url 'dashboard:faq' %}">FAQ</a>
+                <a class="button" href="{% url 'dashboard:packages' %}">New Order</a>
+                <label class="button-backdrop" style="width:120px;height:40px;"></label>
+            </div>
+        </div>
+
+        {% block contents %}
+        {% endblock contents %}
+
+        <div class="bottom">
+            <a class="button" href="#"><img src="{% static 'assets/images/DiscordLogo.svg' %}" alt="discord logo" /></a>
+            <label class="button-backdrop" style="width:150px;height:40px;"></label>
+        </div>
+
+        <script src="{% static 'assets/main/script.js' %}"></script>
+        <script src="{% static 'assets/custom.js' %}"></script>
+    </body>
+
+</html>

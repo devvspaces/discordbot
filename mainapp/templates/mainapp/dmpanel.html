@@ -1,0 +1,176 @@
+{% extends 'mainapp/base.html' %}
+{% load static %}
+{% block contents %}
+<div id="board">
+    <div class="statistics">
+
+        <div class="group">
+            <label>Order ID</label>
+            <span>H3Z2-1223</span>
+        </div>
+
+        <div class="group">
+            <label>Messages left</label>
+            <span>{{ messages_left }}</span>
+        </div>
+
+    </div>
+
+    <textarea placeholder="Enter a message"></textarea>
+
+    <div class="table" style="width:490px;height:200px;float:right;">
+        <input class="search" type="text" name="discord_server_invite_link" placeholder="Enter server invite" />
+        <button id='addServer' class="green submit-button" type="button">Add server</button>
+
+        <table style="height:calc(100% - 60px);margin-top:30px;">
+            <tbody id="server-list">
+
+                
+                {% if listed_servers.count == 0 %}
+                    <tr id='no_servers'><td>No servers added yet</td></tr>
+                {% endif %}
+                    
+                
+                {% for server in listed_servers %}
+                <tr>
+                    <td><img src="{{ server.icon }}" alt="">{{ server.name }}</td>
+                    <td>{{ server.members }} <label class="avatar-icon"></label></td>
+                    <td><button class="red" type="button" onclick="">Remove</button><button class="connect_server green" type="button" connect_id="{{ server.uid }}">Connect</button></td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+
+    <div class="table" style="width:490px;height:200px;float:right;">
+        <div id="blacklist-list">
+            <button class="green submit-button" onclick="showBlackListSettings();" type="button">Add Blacklist</button>
+
+            <table style="height:calc(100% - 60px);margin-top:60px;">
+            <tbody>
+
+                <!-- <td>No blacklist added yet</td> -->
+
+                <tr>
+                    <td><img src="" alt="discord server logo"> Someone's Blacklist</td>
+                    <td>10,265 <label class="avatar-icon"></label></td>
+                    <td><button class="red" type="button" onclick="">Remove</button><button class="green" type="button" onclick="">Select</button></td>
+                </tr>
+
+            </tbody>
+        </table>
+        </div>
+        <div id="blacklist-settings">
+            <span style="display:block;text-align:center;margin:-10px auto 10px -50px;">Blacklist methods</span>
+
+            <div class="method">
+                <span>Blacklist a server</span>
+                <input type="text" name="blacklist_server" placeholder="Enter server invite"/>
+            </div>
+
+            <div class="method">
+                <span>Blacklist user IDs</span>
+                <input id="blacklist_user_id" type="file" name="blacklist_user_id" accept="text/plain"/>
+                <div class="input-file" onclick="document.getElementById('blacklist_user_id').click();">Select a file (.txt)</div>
+            </div>
+
+            <div class="method">
+                <span>Blacklist usernames</span>
+                <input id="blacklist_user_id" type="file" name="blacklist_user_id" accept="text/plain"/>
+                <div class="input-file" onclick="document.getElementById('blacklist_user_id').click();">Select a file (.txt)</div>
+            </div>
+
+            <div style="position:absolute;bottom:30px;left:0;right:0;text-align:center;margin-left: -55px;">
+                <button class="red submit-button" onclick="hideBlackListSettings();" type="button" style="float:none;margin-right:10px;">Back</button>
+                <button class="green submit-button" onclick="confirmBlackListSettings();" type="button" style="float:none;">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings">
+        <span class="setting">Stop After <input type="number" name="stop_after_amount" min="0" step="1" /> Messages</span>
+
+        <span class="setting">Add Users as Friend
+            <label class="switch">
+                <input id="add_friend_checkbox" type="checkbox">
+                <span class="switch-slider"></span>
+            </label>
+        </span>
+
+        <span class="setting">Add Repeat Users to Blacklist
+            <label class="switch">
+                <input id="add_to_blacklist_checkbox" type="checkbox">
+                <span class="switch-slider"></span>
+            </label>
+        </span>
+    </div>
+
+
+    <div class="board-bottom">
+        <div class="delay-container">
+            <label>Delay</label>
+            <label id="delay_display" style="float:right;">20s</label>
+            <input id="delay" type="range" min="15" max="60" step="1" value="20" class="delay">
+        </div>
+
+        <div class="board-bottom-right">
+            <div class="progress">
+                <label>Progress</label>
+                <label style="float:right;">800 messages sent</label>
+                <progress value="66" max="100"></progress>
+            </div>
+
+            <div class="start">
+                <a id="startstop" class="button" onclick="start();" style="cursor:pointer;">Start</a>
+                <label class="button-backdrop" style="width:75px;height:35px;top:-30px;left:-5px;"></label>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var delay = document.getElementById('delay');
+    var delay_display = document.getElementById('delay_display');
+    // delay_display.innerHTML = delay.value + 's';
+
+    delay.oninput = function() {
+        delay_display.innerHTML = delay.value + 's';
+    }
+
+    function showBlackListSettings() {
+        document.getElementById('blacklist-list').style.display = 'none';
+        document.getElementById('blacklist-settings').style.display = 'block';
+    }
+    function hideBlackListSettings() {
+        document.getElementById('blacklist-list').style.display = '';
+        document.getElementById('blacklist-settings').style.display = '';
+    }
+    function confirmBlackListSettings() {
+        document.getElementById('blacklist-list').style.display = 'none';
+        document.getElementById('blacklist-settings').style.display = 'block';
+
+        //add blacklist to table
+
+        hideBlackListSettings();
+    }
+
+    function start() {
+        $('#startstop').html('<div class="loading"></div>')
+
+        setTimeout(function() {
+            $('#startstop').html('Stop')
+            $('#startstop').attr('onclick', 'stop();')
+
+        }, 3000);
+    }
+
+    function stop() {
+        $('#startstop').html('<div class="loading"></div>')
+
+        setTimeout(function() {
+            $('#startstop').html('Start')
+            $('#startstop').attr('onclick', 'start();')
+        }, 3000);
+    }
+</script>
+{% endblock contents %}

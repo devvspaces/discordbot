@@ -1,0 +1,26 @@
+{% extends 'mainapp/base.html' %}
+{% load static %}
+{% block contents %}
+        <div id="board">
+
+            <span id="title" class="title">FAQ</span>
+
+            <div class="table" style="height:calc(100% - 115px);">
+
+                <div id="back" onclick="closeInfo();"><img src="assets/images/ArrowLeft.svg" alt="back" /></div>
+                <div id="info-hidden">
+
+                </div>
+
+                <div id="table-buttons" style="height:100%;display:block;overflow:auto;">
+                    <button class="button-link" onclick="showInfo('Payments', 'For Payments we accept a variety of Crypto Currencies: Bitcoin / Ethereum / Litecoin / Bitcoin Cash / USDC / DAI / Dogecoin.<br>For Crypto, it usually takes a little while for the payment to come through, so its normal to be waiting 1-10 minutes for your order to come through, if it hasn\'t yet contact support.<br>If you would like to pay in Paypal or Stripe please contact the owners directly.');">Payment</button>
+                    <button class="button-link" onclick="showInfo('Orders', 'Once you have purchased something from our site, it should show up in your orders.<br>Has your order not shown up yet? Wait a couple of minutes, but if that didnt work then:<br>Contact support with proof of payment and we will sort it out for you.<br>Once you\'ve recieved your order, you can start sending messages immidietly!');">Orders</button>
+                    <button class="button-link" onclick="showInfo('Sending Messages', 'Sending messages from our dm panel may seem complex at first, but its only a few button clicks!<br>First of all go to: Dashboard, and find your order. Click \'Open\'.<br>Now you are in the DM panel where you can send out your order.<br>First of all you will need a good message, a good message is for example:<br>\'Join us! Our pump server has big gains / giveaways / fair pumps\'<br>NOT something like \'hey, join my pump server thanks.\'<br>A good message impacts the amount of people who will join from your invites.<br>Second of all, enter your target server, this is the server which you would like to DM advertise in. and after its finished parsing, click connect!<br>Third, add your preferred blacklist. This isnt required but if you would like to exclude your server users from being messaged for example then its pretty helpful.<br>There are multiple other options aswell. \'Stop after ___ Messages\' is if you would like to stop after a set amount of messages.<br>\'Add Users as Friend\' adds a messaged user as a friend.<br>\'Add Repeat Users to Blacklist\' adds a user which has been messaged to your active blacklist.<br>\'Delay\' From 15s-60s the higher it is the less chance the bots will have of failing.<br>And you\'re done! you can send out messages :)');">Sending Messages</button>
+                    <button class="button-link" onclick="showInfo('lorumipsum', 'lorumipsum');">Blacklist</button>
+                    <button class="button-link" onclick="showInfo('lorumipsum', 'lorumipsum');">Miscellaneous</button>
+                    <button class="button-link" onclick="showInfo('lorumipsum', 'lorumipsum');">Errors</button>
+                </div>
+
+            </div>
+        </div>
+{% endblock contents %}

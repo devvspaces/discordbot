@@ -1,0 +1,24 @@
+{% extends 'mainapp/base.html' %}
+{% load static %}
+{% block contents %}
+        <div id="board">
+
+            <span class="title">Support</span>
+
+            <div class="table" style="height:calc(100% - 115px);">
+                <p class="text" style="margin-top:80px;">Before opening a Support Ticket make sure to check out our FAQ,<br>this answers most questions which you may have...</p>
+                <a href="faq.html" class="link">FAQ</a>
+                <p class="text" style="margin-top:100px;">If that still hasn't helped, feel free to open a support ticket on<br>our Discord Server:</p>
+
+                <div class="bottom" style="margin-top:0;">
+                    <a class="button" href="#"><img src="assets/images/DiscordLogo.svg" alt="discord logo" /></a>
+                    <label class="button-backdrop" style="width:150px;height:40px;"></label>
+                </div>
+
+                <div class="board-bottom" style="font-size:15px;">
+                    <p class="text">Or email support at: <a href="mailto:support@lunar-promos.com" style="color:#CCCCCC;">support@lunar-promos.com</a></p>
+                </div>
+            </div>
+
+        </div>
+{% endblock contents %}

@@ -1,0 +1,65 @@
+{% extends 'mainapp/base.html' %}
+{% load static %}
+{% block contents %}
+    <div id="board">
+        <a class="packages-link" href="packages.html"><strong>Packages</strong> <label class="packages-link-image"></label></a>
+
+        <div class="statistics right">
+
+            <div class="group">
+                <label>Bots online</label>
+                <span>1,245</span>
+            </div>
+
+            <div class="group">
+                <label>Bots available</label>
+                <span>567</span>
+            </div>
+
+            <div class="group">
+                <label>Messages sent</label>
+                <span>{{ messages_sent }}</span>
+            </div>
+
+            <div class="group">
+                <label>Orders made</label>
+                <span>16</span>
+            </div>
+
+        </div>
+
+        <div class="table" style="width:calc(100% - 60px);height:calc(100% - 114px);">
+            <table>
+                <thead>
+
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Product</th>
+                        <th>Date</th>
+                        <th style="padding-left:12px;">Status</th>
+                        <th></th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% if orders.count == 0 %}
+                        <td>No orders made yet</td>
+                    {% endif %}
+
+                    {% for i in orders %}
+                    <tr>
+                        <td>{{ i.order_id }}</td>
+                        <td>{{ i.dm_amount }} DMs</td>
+                        <td>{{ i.created }}</td>
+                        <td><span class="orange">{{ i.get_status_display }}</span></td>
+                        <td><a class="button" href="{% url 'dashboard:dm_panel' %}">Open</a></td>
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock contents %}

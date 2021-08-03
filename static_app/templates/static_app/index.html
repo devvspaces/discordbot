@@ -1,0 +1,133 @@
+{% extends 'static_app/base.html' %}
+{% load static %}
+{% block content %}
+    <!-- Pricings Button -->
+    <section class="header2 cid-sDw3mVX7yE mbr-fullscreen" id="header2-3" style="min-height:calc(100vh - 100px);">
+        <div class="container" style="max-width:100vw!important;">
+            <div class="row" style="max-width:1520px;margin:auto;">
+                <div class="col-12 col-lg-7">
+                    <h1 class="mbr-section-title mbr-fonts-style mb-3 display-1"style="margin-bottom:0!important;"><strong>Lunar Promos</strong></h1>
+
+                    <p class="mbr-text mbr-fonts-style display-7" style="margin-bottom:0;opacity:.75;">Promote your Discord Business with Ease.</p>
+                    <p class="mbr-text mbr-fonts-style display-12" style="opacity:.5;">No more annoying proxies/captchas/tokens needed to send messages, we will handle that.</p>
+                    <div class="mt-3">
+                        <a class="button" href="pricing.html" style="margin-right:20px;">Pricing</a>
+
+                        <a class="button" href="../dashboard.html">Dashboard</a>
+                    </div>
+                </div>
+            </div>
+            <label style="width:40%;height:75vh;position:absolute;right:200px;top:-300px;bottom:-300px;background: radial-gradient(#B666D2, #EC609D, #FFFFFF);border-radius:50%;filter:blur(50px);opacity:.08;"></label>
+            <img src="{% static 'assets/images/Banner.png' %}" alt="banner" class="banner"/>
+            <label style="width:calc(100vw + 60px);height:50px;position:absolute;left:-30px;;bottom:-400px;box-shadow:0 -10px 30px -20px #000000;"></label>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features1 cid-sDvZWNaLpS" id="features1-1">
+        <div class="container">
+            <div class="row">
+                <!-- First Item -->
+                <div class="card col-12 col-md-6 col-lg-4" style="max-width:300px;margin:0 100px;">
+                    <div class="card-wrapper">
+                        <div class="card-box align-center">
+                            <div class="iconfont-wrapper">
+                                <img src="{% static 'assets/images/Messages.svg' %}" alt="package" style="width:50px;margin:auto auto 20px auto;display:block;"/>
+                            </div>
+                            <h5 class="card-title mbr-fonts-style display-7">Buy Message</h5>
+                            <p class="card-text mbr-fonts-style display-10">Once you've bought a package, you have instant access to our servers to send out the amount of messages you want.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Second Item -->
+                <div class="card col-12 col-md-6 col-lg-4" style="max-width:300px;margin:0 100px;">
+                    <div class="card-wrapper">
+                        <div class="card-box align-center">
+                            <div class="iconfont-wrapper">
+                                <img src="{% static 'assets/images/Write.svg' %}" alt="package" style="width:50px;margin:auto auto 20px auto;display:block;"/>
+                            </div>
+                            <h5 class="card-title mbr-fonts-style display-7">Enter a message</h5>
+                            <p class="card-text mbr-fonts-style display-10">You can enter the advertisement message of your choice which will be sent to other, you can set a message delay, add a blacklist and more.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Third Item -->
+                <div class="card col-12 col-md-6 col-lg-4" style="max-width:300px;margin:0 100px;">
+                    <div class="card-wrapper">
+                        <div class="card-box align-center">
+                            <div class="iconfont-wrapper">
+                                <img src="{% static 'assets/images/Server.svg' %}" alt="package" style="width:50px;margin:auto auto 20px auto;display:block;"/>
+                            </div>
+                            <h5 class="card-title mbr-fonts-style display-7">Done!</h5>
+                            <p class="card-text mbr-fonts-style display-10">That's all! It will everything is handled on our side, no need for accounts,proxies,captchas and other nonsense, just press sent and sit back.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Review Section -->
+    <section class="testimonials2 cid-sDwaCVvTzt" id="testimonials2-5" style="padding:50px 0 0 0;">
+        <div class="container">
+            <h1 class="mbr-section-title mbr-fonts-style mb-3 display-1" style="margin-bottom:50px!important;text-align:center;"><img src="{% static 'assets/images/star.svg' %}" alt="rating star" style="width:50px;height: 50px;display:inline-block;margin-right:10px;vertical-align:initial;" /><strong>Reviews</strong><img src="{% static 'assets/images/star.svg' %}" alt="rating star" style="width:50px;height: 50px;display:inline-block;margin-left:10px;vertical-align:initial;" /></h1>
+
+            <div class="row justify-content-center">
+                <!-- First user -->
+                <!-- Second User -->
+                <div class="card col-12 col-md-6" style="max-width:500px;height:150px;margin:0 100px 100px 100px;border:1px solid white;border-radius:20px;padding:20px;">
+                    <div class="d-flex mb-md-0 mb-4" style="margin-bottom:0!important;">
+                        <div class="text-wrapper">
+                            <p class="name mbr-fonts-style mb-1 display-4" style="margin-bottom:0!important;">
+                                <strong>Abhay</strong> - customer
+                            </p>
+                        </div>
+                    </div>
+                    <p class="mbr-text mbr-fonts-style mb-4 display-10" style="margin-bottom:0;">I’m vouching for this service, my server is growing with members related in my niche. These prices are great.</p>
+
+                    <img src="{% static 'assets/images/stars.svg' %}" alt="5/5 rating" style="width:100px;position:absolute;bottom:20px;" />
+
+                </div>
+
+                <div class="card col-12 col-md-6" style="max-width:500px;height:150px;margin:0 100px 100px 100px;border:1px solid white;border-radius:20px;padding:20px;">
+                    <div class="d-flex mb-md-0 mb-4" style="margin-bottom:0!important;">
+                        <div class="text-wrapper">
+                            <p class="name mbr-fonts-style mb-1 display-4" style="margin-bottom:0!important;">
+                                <strong>Kiprugod</strong> - customer
+                            </p>
+                        </div>
+                    </div>
+                    <p class="mbr-text mbr-fonts-style mb-4 display-10" style="margin-bottom:0;">Extremely good prices compared to other services.</p>
+
+                    <img src="{% static 'assets/images/stars.svg' %}" alt="5/5 rating" style="width:100px;position:absolute;bottom:20px;" />
+
+
+                </div>
+                <div class="card col-12 col-md-6" style="max-width:500px;margin:0 100px 100px 100px;border:1px solid white;border-radius:20px;padding:20px;">
+                    <div class="d-flex mb-md-0 mb-4" style="margin-bottom:0!important;">
+                        <div class="text-wrapper">
+                            <p class="name mbr-fonts-style mb-1 display-4" style="margin-bottom:0!important;">
+                                <strong>Mr Pump</strong> - customer
+                            </p>
+                        </div>
+                    </div>
+                    <p class="mbr-text mbr-fonts-style mb-4 display-10" style="margin-bottom:0;">Okay, I ordered this service a few hours ago. Only half my order is done, but I’m gonna just go ahead and write this now. Amazing service from these fellas. They are giving an amazing deal compared to other DM services! Seriously it’s so cheap, and so effective.</p>
+
+                    <img src="{% static 'assets/images/stars.svg' %}" alt="5/5 rating" style="width:100px;position:absolute;bottom:20px;" />
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="testimonials2 cid-sDwaCVvTzt" id="contactsection" style="padding-top:20px;">
+        <div class="container" style="text-align:center;">
+            <p class="mbr-text mbr-fonts-style mb-4 display-10" style="max-width:300px;margin:auto auto 0 auto;text-align:center;">If you have any questions feel free to join our discord or contact us via email.</p>
+
+            <a href="mailto:support@lunar-promos.com" style="margin-right:50px;color:#FFFFFF;">support@lunar-promos.com</a>
+            <a class="button" href="#" target="_blank" style="vertical-align:middle;"><img src="{% static 'assets/images/DiscordLogo.svg' %}" alt="Discord logo" /></a>
+        </div>
+    </section>
+{% endblock content %}
