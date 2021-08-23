@@ -48,8 +48,9 @@ class Driver:
         chrome_options.add_argument("disable-infobars")
         chrome_options.add_argument("--disable-extensions")
 
-        # chromeOptions.add_argument("--headless")
-        driver = webdriver.Chrome("C:/Users/HP6460B/discordauto/mainapp/main/chromedriver.exe", options=chrome_options)
+        chrome_options.add_argument("--headless")
+
+        driver = webdriver.Chrome("/home/discordbot/mainapp/main/chromedriver.exe", options=chrome_options)
 
         self.driver = driver
 
