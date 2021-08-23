@@ -14,6 +14,8 @@ body {
     font-size: 15px;
 }
 
+.alert{position:relative;padding:.75rem 1.25rem;margin-bottom:1rem;border:1px solid transparent;border-radius:.25rem}.alert-heading{color:inherit}.alert-link{font-weight:700}.alert-dismissible{padding-right:4rem}.alert-dismissible .close{position:absolute;top:0;right:0;padding:.75rem 1.25rem;color:inherit}.alert-primary{color:#004085;background-color:#cce5ff;border-color:#b8daff}.alert-primary hr{border-top-color:#9fcdff}.alert-primary .alert-link{color:#002752}.alert-secondary{color:#383d41;background-color:#e2e3e5;border-color:#d6d8db}.alert-secondary hr{border-top-color:#c8cbcf}.alert-secondary .alert-link{color:#202326}.alert-success{color:#155724;background-color:#d4edda;border-color:#c3e6cb}.alert-success hr{border-top-color:#b1dfbb}.alert-success .alert-link{color:#0b2e13}.alert-info{color:#0c5460;background-color:#d1ecf1;border-color:#bee5eb}.alert-info hr{border-top-color:#abdde5}.alert-info .alert-link{color:#062c33}.alert-warning{color:#856404;background-color:#fff3cd;border-color:#ffeeba}.alert-warning hr{border-top-color:#ffe8a1}.alert-warning .alert-link{color:#533f03}.alert-danger{color:#721c24;background-color:#f8d7da;border-color:#f5c6cb}.alert-danger hr{border-top-color:#f1b0b7}.alert-danger .alert-link{color:#491217}.alert-light{color:#818182;background-color:#fefefe;border-color:#fdfdfe}.alert-light hr{border-top-color:#ececf6}.alert-light .alert-link{color:#686868}.alert-dark{color:#1b1e21;background-color:#d6d8d9;border-color:#c6c8ca}.alert-dark hr{border-top-color:#b9bbbe}.alert-dark .alert-link{color:#040505}
+
 @keyframes shake {
   0% { transform: translate(0px, 0px) rotate(0deg); }
   20% { transform: translate(0px, 0px) rotate(-1deg); }
@@ -221,10 +223,10 @@ a {
     display: inline-block!important;
     border-radius: 25px;
     color: #FFFFFF!important;
-    transition: .2s;
+    transition: .3s;
     }
     .button:hover {
-    padding: 11px 22px;
+    transform: scale(1.1);
     }
     .button:hover:not(.packages .button:hover) + .button-backdrop {
     padding: 2px;
@@ -248,6 +250,8 @@ a {
 nav {
     margin: auto;
     padding: 20px 0;
+    position: fixed;
+    top: 3rem;
     }
     nav img {
     vertical-align: middle
@@ -270,10 +274,9 @@ nav {
 
 #sidenav {
     width: 120px;
-    position: absolute;
-    top: 150px;
-    /* left: 50%; */
-    /* margin-left: -750px; */
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
     margin-left: -30px;
     text-align: center;
     }
@@ -308,7 +311,7 @@ nav {
     width: 1140px;
     height: 690px;
     position: relative;
-    margin: 30px auto auto auto;
+    margin: 150px auto auto auto;
     padding: 30px;
     border-radius: 20px;
     background-color: #312A50;
@@ -511,6 +514,28 @@ nav {
     right: 0; */
     margin: auto auto auto 210px;
     }
+
+.dm_panel_122_table .actions .btn{
+    display: inline-block;
+    font-size: .8rem;
+    margin: 0 0 0 .5rem;
+    padding: .2rem .3rem;
+}
+
+.icon_name_side{
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 0 0 0 1rem;
+}
+.icon_name_side a{
+    max-width: 90px;
+    overflow: hidden;
+    display: inline-block;
+    /* white-space: pre; */
+    margin: auto 0;
+}
+
     #blacklist-settings {
     display: none;
     color: #CCCCCC;
@@ -525,11 +550,14 @@ nav {
     #blacklist-settings .method:last-child {
     margin-bottom: 0;
     }
+    #blacklist-settings input{
+        width: 250px !important;
+        box-sizing: border-box;
+    }
     #blacklist-settings input[type='text'], #blacklist-settings .input-file {
     float: right;
     }
     #blacklist-settings input[type='text'] {
-    width: 110px;
     margin: 0;
     background-color: #312A50;
     }
@@ -538,7 +566,7 @@ nav {
     }
     #blacklist-settings .input-file {
     display: table-cell;
-    width: 150px;
+    width: 250px !important;
     height: 40px;
     background-color: #312A50;
     border-radius: 20px;
@@ -611,6 +639,7 @@ nav {
     height: 50px;
     display: inline-table;
     border-radius: 10px;
+    transition: .3s;
     }
     tbody tr:nth-child(odd) {
     background-color: #312A50;
@@ -636,9 +665,10 @@ nav {
     tbody button {
     cursor: pointer;
     border: none;
+    transition: .3s;
     }
     tbody button:hover {
-    padding: 6px 11px;
+    transform: scale(1.05);
     }
     tbody button:first-child {
     margin-right: 10px;
@@ -725,5 +755,364 @@ nav {
 
     .popup p{
         margin: 0;
-        text-align: center;
+        /* text-align: center; */
+        line-height: 1.5rem;
     }
+    .popup .close{
+        float: right;
+        margin-bottom: .5rem;
+        cursor: pointer;
+    }
+
+tbody tr.selected {
+    background-color: rgb(193 71 137);
+}
+
+
+#server{
+    height: 100%;
+    position: relative;
+    z-index: 2;
+}
+
+#server .detail_head{
+    text-align: center;
+}
+#server .detail_head .title{
+    font-size: 3rem;
+    margin: 0;
+    margin-bottom: .1rem;
+    color: #fff;
+    line-height: 3rem;
+}
+#server .detail_head p.users{
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 0;
+    margin-bottom: 1rem;
+    opacity: .6;
+    /* line-height: 2.5rem; */
+}
+#server .detail_head input{
+    width: 100%;
+    max-width: 400px;
+}
+
+#server .table table td{
+    width: 150px;
+    /* text-align: left; */
+}
+#server .table table th {
+    width: 180px;
+    text-align: center;
+}
+#server .table table td:nth-child(5),
+#server .table table th:nth-child(5){
+    width: 300px;
+}
+
+#server .table{
+    height: 350px;
+}
+#server .table .actions{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: .5rem;
+}
+#server .table .actions .btn{
+    margin: 0;
+    margin-left: 1rem;
+    font-size: .8rem;
+}
+
+.btn {
+    display: block;
+    background-color: rgb(9, 72, 124);
+    color: #fff;
+    padding: .375rem .75rem;
+    border-radius: 2rem;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    transition: .3s;
+    cursor: pointer;
+}
+.btn.btn-danger{
+    background-color: rgb(202, 26, 26);
+}
+.btn.btn-muted{
+    background-color: #261F47;
+}
+.btn.btn-teal{
+    background-color: #467268;
+}
+
+.btn:hover {
+    background-color: rgb(6, 58, 100);
+    padding: .375rem .75rem;
+    transform: scale(1.05);
+}
+.btn.btn-danger:hover{
+    background-color: rgb(179, 14, 14);
+}
+.btn.btn-muted:hover{
+    background-color: #1f183d;
+}
+.btn.btn-teal:hover{
+    background-color: #325c52;
+}
+
+.bottom-options{
+    text-align: center;
+    max-width: 500px;
+    margin: 1rem auto;
+}
+.bottom-options .btn{
+    margin: 0 .5rem;
+}
+.bottom-options .options{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.modal_box h4{
+    text-align: center;
+    font-size: 1.5rem;
+    margin: 0;
+}
+.modal_box{
+    position: absolute;
+    top: 50%;
+    right: 0;
+    background-color: #312A50;
+    width: 250px;
+    border-radius: 30px;
+    padding: 1rem;
+    transform: translate(0, -50%);
+    z-index: 1;
+    opacity: 0;
+    transition: .3s;
+}
+.modal_box.active{
+    transform: translate(120%, -50%);
+    opacity: 1;
+}
+#blacklistbox .inner{
+    background-color: #261F47;
+    padding: .1rem .5rem .5rem .5rem;
+    margin: 1rem 0;
+    border-radius: .5rem;
+    max-height: 200px;
+    overflow-x: hidden;
+}
+#blacklistbox .inner .item{
+    background-color: #312A50;
+    padding: .7rem;
+    margin: .5rem 0 0 0;
+    border-radius: .5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: .3s;
+}
+#blacklistbox .inner .item.selected{
+    background-color: rgb(193 71 137);
+}
+#blacklistbox .inner .item p{
+    margin: 0;
+}
+#blacklistbox .inner .item span.select_blacklist{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #467268;
+    cursor: pointer;
+}
+.modal_box .options{
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    margin-top: 1.5rem;
+}
+.modal_box .options .btn{
+    min-width: 100px;
+}
+
+.modal_box .form-item{
+    margin: 2rem 0;
+}
+
+
+.slides table{
+    max-height: 150px;
+    overflow-y: scroll;
+    padding: 0 !important;
+    overflow-x: hidden;
+    margin-top: 1rem;
+}
+#slide2{
+    display: none;
+    position: relative;
+}
+#slide2 h4{
+    margin-top: 0;
+    text-align: center;
+    font-size: 1.4rem;
+}
+#slide2 tbody td.manage_select{
+    width: 50px;
+}
+#slide2 tbody td.icon_name_side{
+    padding: 0;
+}
+#slide2 table{
+    position: relative;
+    z-index: 2;
+}
+
+#manage_server_box{
+    position: absolute;
+    top: 50%;
+    right: 0;
+    background-color: #312A50;
+    width: 250px;
+    border-radius: 30px;
+    padding: 1rem;
+    transform: translate(0, -50%);
+    z-index: 1;
+    opacity: 0;
+    transition: .3s;
+}
+#manage_server_box.active{
+    transform: translate(130%, -50%);
+    opacity: 1;
+}
+
+#manage_server_box .options{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.manage_select span{
+    width: 15px;
+    min-height: 15px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    display: inline-block;
+    padding: 0;
+    transition: .3s;
+}
+.manage_select span.active{
+    background-color: #a255be;
+}
+#manageServers{
+    display: block;
+    width: fit-content;
+    margin: 0 auto;
+    font-size: .8rem;
+}
+
+
+
+/* Admin panel add form */
+#board.panel{
+    overflow-x: hidden;
+    padding: 1rem;
+}
+#board .add_form{
+    box-sizing: border-box;
+    max-width: 400px;
+    margin: 1rem auto;
+    text-align: center;
+}
+.add_form .legend{
+    font-size: 2rem;
+    margin-bottom: 0rem;
+}
+
+.nameless_errors{
+    margin: 2rem 0;
+}
+.nameless_errors p{
+    padding: .5rem;
+    border-radius: .3rem;
+    background-color: rgb(223, 39, 39);
+    margin-top: 0;
+}
+
+.form-item{
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+.form-item label{
+    margin-left: 1.5rem;
+}
+.form-item .error-text{
+    margin-left: 1.5rem;
+}
+.form-item input{
+    display: block;
+    width: 100%;
+    box-sizing: border-box !important;
+    margin: 0;
+    margin-top: .5rem;
+}
+.form-item input[type='file']{
+    padding: 0;
+    border-radius: .3rem;
+    font-size: 1rem;
+    height: auto;
+    padding: .6rem;
+}
+.add_form form{
+    margin: 2rem 0;
+}
+.error-text{
+    color: rgb(223, 39, 39);
+    margin-top: .3rem;
+    display: block;
+}
+.fsubmit-btn{
+    display: block;
+    width: 100%;
+    font-size: 1.1rem;
+    margin: 0;
+    border-radius: .3rem;
+    padding: .7rem 1rem;
+    background: linear-gradient(to right, #B666D2, #EC609D);
+    background-size: 200%;
+    background-position-x: left;
+}
+.fsubmit-btn:hover{
+    transform: none;
+    padding: .7rem 1rem;
+    background-color: #EC609D;
+    background-position-x: right;
+}
+.or_text{
+    margin: 2rem 0;
+}
+
+.double_label{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#eye_visible{
+    color: #595178;
+    transition: .3s;
+    cursor: pointer;
+    margin-right: 1rem;
+    font-size: 1rem;
+}
+#eye_visible.active{
+    color: #fff;
+}

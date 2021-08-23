@@ -1,0 +1,75 @@
+{% extends 'mainapp/base.html' %}
+{% load static %}
+{% block contents %}
+        <div id="board" class="panel">
+            
+            <div class="add_form">
+                <h4 class="legend">Add New Account</h4>
+                <form action="" method="POST" autocomplete="off">
+                    {% csrf_token %}
+
+                    <div class="nameless_errors">
+                        {% for err in manual.non_field_errors %}
+                          <p>{{ err }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-item">
+                        <label for="add_email">Enter Email</label>
+                        <input required type="email" name="email" id="add_email">
+                        
+                        {% if manual.email.errors %}
+                            {% for i in manual.email.errors %}
+                                <small class="error-text">{{ i }}</small>
+                            {% endfor %}
+                        {% endif %}
+                            
+                    </div>
+                    <div class="form-item">
+                        <div class="double_label">
+                            <label for="add_pass">Enter Password</label>
+                            <span input="add_pass" id="eye_visible"><i class="fas fa-eye"></i></span>
+                        </div>
+                        <input required type="password" name="password" id="add_pass">
+
+                        {% if manual.password.errors %}
+                            {% for i in manual.password.errors %}
+                                <small class="error-text">{{ i }}</small>
+                            {% endfor %}
+                        {% endif %}
+
+                    </div>
+                    <div class="form-item">
+                        <label for="add_token">Enter Token</label>
+                        <input required type="text" name="token" id="add_token">
+
+                        {% if manual.token.errors %}
+                            {% for i in manual.token.errors %}
+                                <small class="error-text">{{ i }}</small>
+                            {% endfor %}
+                        {% endif %}
+
+                    </div>
+                    <button name="submit" value="manual" type="submit" class="btn btn-primary fsubmit-btn">Add Account</button>
+                </form>
+
+                <hr>
+                <p class="or_text">OR</p>
+                
+                <form action="" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-item">
+                        <label for="csv_file">Upload CSV File</label>
+                        <input required type="file" name="csv_file" id="csv_file">
+                        {% if csv_form.csv_file.errors %}
+                            {% for i in csv_form.csv_file.errors %}
+                                <small class="error-text">{{ i }}</small>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <button name="submit" value="file" type="submit" class="btn btn-primary fsubmit-btn">Upload Accounts</button>
+                </form>
+            </div>
+
+        </div>
+{% endblock contents %}

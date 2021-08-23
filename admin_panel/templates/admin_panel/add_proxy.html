@@ -1,0 +1,50 @@
+{% extends 'mainapp/base.html' %}
+{% load static %}
+{% block contents %}
+        <div id="board" class="panel">
+            
+            <div class="add_form">
+                <h4 class="legend">Add New Proxy</h4>
+                <form action="" method="POST" autocomplete="off">
+                    {% csrf_token %}
+
+                    <div class="nameless_errors">
+                        {% for err in manual.non_field_errors %}
+                          <p>{{ err }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-item">
+                        <label for="ip_port">Enter Proxy Address</label>
+                        <input required type="text" name="ip_port" id="ip_port">
+
+                        {% if manual.ip_port.errors %}
+                            {% for i in manual.ip_port.errors %}
+                                <small class="error-text">{{ i }}</small>
+                            {% endfor %}
+                        {% endif %}
+
+                    </div>
+                    <button name="submit" value="manual" type="submit" class="btn btn-primary fsubmit-btn">Save</button>
+                </form>
+
+                <hr>
+                <p class="or_text">OR</p>
+                
+                <form action="" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-item">
+                        <label for="csv_file">Upload CSV File</label>
+                        <input required type="file" name="csv_file" id="csv_file">
+                        {% if csv_form.csv_file.errors %}
+                            {% for i in csv_form.csv_file.errors %}
+                                <small class="error-text">{{ i }}</small>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <button name="submit" value="file" type="submit" class="btn btn-primary fsubmit-btn">Upload Proxies</button>
+                </form>
+            </div>
+
+        </div>
+{% endblock contents %}

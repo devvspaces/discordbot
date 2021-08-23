@@ -1,6 +1,7 @@
 from django.db import models
 
-class DiscordAccountQuery(models.QuerySet):
+
+class MostUnused(object):
     def most_unused(self):
         # Find the discord account instance that is most unused
         min_value = self.first().use_count if self.first() else 0
@@ -10,11 +11,24 @@ class DiscordAccountQuery(models.QuerySet):
                 min_value = i.use_count
                 min_instance = i
         
-        
         return min_instance
+
+class DiscordAccountQuery(models.QuerySet, MostUnused):
+    pass
+        
 
 class DiscordAccountManager(models.Manager):
     def get_queryset(self):
         return DiscordAccountQuery(model=self.model, using=self._db)
+    def most_unused(self):
+        return self.get_queryset().most_unused()
+
+
+class ProxyPortQuery(models.QuerySet, MostUnused):
+    pass
+
+class ProxyPortManager(models.Manager):
+    def get_queryset(self):
+        return ProxyPortQuery(model=self.model, using=self._db)
     def most_unused(self):
         return self.get_queryset().most_unused()

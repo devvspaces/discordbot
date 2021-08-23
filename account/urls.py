@@ -13,6 +13,6 @@ urlpatterns = [
     
     path("activate/<slug:uidb64>/<slug:token>/", views.activate_email, name="activate"),
 
-    path('reset-password/', views.ResetPasswordFormPage.as_view(), name='password_reset'),
-    path('reset/<uidb64>/<token>/', views.ResetPasswordVerify.as_view(), name='password_reset_confirm'),
+    # path('reset-password/', views.ResetPasswordFormPage.as_view(), name='password_reset'),
+    # path('reset/<uidb64>/<token>/', views.ResetPasswordVerify.as_view(), name='password_reset_confirm'),
 ]

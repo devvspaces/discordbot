@@ -7,8 +7,9 @@ from django.db import models
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from django.urls import reverse
+from django.utils import timezone
 
-from .managers import DiscordAccountManager
+from .managers import DiscordAccountManager, ProxyPortManager
 
 
 class UserManager(BaseUserManager):
@@ -97,18 +98,29 @@ class User(AbstractBaseUser):
 
 
 class DiscordAccount(models.Model):
-    # user = models.ForeignKey(User, on_delete=models.CASCADE)
-    email = models.EmailField()
+    email = models.EmailField(unique=True)
     password = models.CharField(max_length=200)
-    token = models.CharField(max_length=200)
+    token = models.CharField(max_length=200, unique=True)
     active = models.BooleanField(default=False)
     uid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     use_count = models.IntegerField(default=0)
+    expired_token = models.BooleanField(default=False)
 
     objects = DiscordAccountManager()
 
     def __str__(self):
-        return str(self.uid)
+        return self.email
+
+
+class ProxyPort(models.Model):
+    ip_port = models.CharField(max_length=200, unique=True)
+    active = models.BooleanField(default=False)
+    use_count = models.IntegerField(default=0)
+
+    objects = ProxyPortManager()
+
+    def __str__(self):
+        return self.ip_port
 
 
 class Profile(models.Model):
@@ -127,3 +139,4 @@ class Profile(models.Model):
 @receiver(post_save, sender=User)
 def create_profile(sender, instance, created, **kwargs):
     profile = Profile.objects.get_or_create(user=instance)
+    # Generate random username

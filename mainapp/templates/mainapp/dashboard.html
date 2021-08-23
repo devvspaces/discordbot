@@ -2,7 +2,7 @@
 {% load static %}
 {% block contents %}
     <div id="board">
-        <a class="packages-link" href="packages.html"><strong>Packages</strong> <label class="packages-link-image"></label></a>
+        <a class="packages-link" href="{% url 'dashboard:packages' %}"><strong>Packages</strong> <label class="packages-link-image"></label></a>
 
         <div class="statistics right">
 
@@ -23,7 +23,7 @@
 
             <div class="group">
                 <label>Orders made</label>
-                <span>16</span>
+                <span>{{ orders.count }}</span>
             </div>
 
         </div>

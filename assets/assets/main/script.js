@@ -2,8 +2,12 @@ var delay = document.getElementById('delay');
 var delay_display = document.getElementById('delay_display');
 // delay_display.innerHTML = delay.value + 's';
 
-delay.oninput = function() {
-    delay_display.innerHTML = delay.value + 's';
+try {
+    delay.oninput = function() {
+        delay_display.innerHTML = delay.value + 's';
+    }
+} catch (error) {
+    
 }
 
 function showBlackListSettings() {

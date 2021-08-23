@@ -1,49 +1,37 @@
-from itertools import count
-import gc
+import uuid
+import requests
+import json
 
-class Obj(object):
-  _ids = count(0)
+g = uuid.uuid4()
+print(g)
+body = {
+    "name":       "AftonFin",
+    "password":   "@Afton7&@",
+    # "appId":      "AftonDEMO",
+    # "appVersion": "0.0.1",
+    # "cid":        59,
+    # "sec":        "30b2bee4-9a61-4ca2-ae38-f8b0b9ab1954",
+    # "deviceId":   "0a401aae-6859-26e9-e7d8-f2971395d20c"
+}
 
-  def __init__(self):
-    self.id = next(self._ids)
+headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+    }
 
-  def __del__(self):
-  	del self
+response = requests.post(url='https://demo.tradovateapi.com/v1/auth/accesstokenrequest', data=json.dumps(body), headers=headers, verify=True)
+print(response.status_code)
+print(response.content)
+print(response.text)
 
-g = Obj()
-# del g
-
-# print(g)
-
-print(len(gc.get_objects()))
-# print(Obj._ids)
-# from collections import defaultdict
-# import weakref
-
-# class KeepRefs(object):
-#     __refs__ = defaultdict(list)
-#     def __init__(self):
-#         self.__refs__[self.__class__].append(weakref.ref(self))
-
-#     @classmethod
-#     def get_instances(cls):
-#         for inst_ref in cls.__refs__[cls]:
-#             inst = inst_ref()
-#             if inst is not None:
-#                 yield inst
-
-# class X(KeepRefs):
-#     def __init__(self, name):
-#         super(X, self).__init__()
-#         self.name = name
-
-# x = X("x")
-# y = X("y")
-# for r in X.get_instances():
-#     print (r.name)
-# del y
-# for r in X.get_instances():
-#     print (r.name)
+# response = requests.post(url='http://www.wellbos.com')
+# print(response.content)
 
 
-# print(isinstance(None, str))
+
+
+REDIRECT_URI  = 'http://localhost:3030/oauth/tradovate/callback'
+EXCHANGE_URL  = 'https://live-d.tradovateapi.com/auth/oauthtoken'
+AUTH_URL      = 'https://trader-d.tradovate.com/oauth'
+
+'https://trader-d.tradovate.com/oauth?response_type=code&client_id=59&redirect_uri=http://www.wellbos.com'

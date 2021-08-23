@@ -6,43 +6,85 @@
 <div id="board">
     <div class="statistics">
 
-        <div class="group">
+        <!-- <div class="group">
             <label>Order ID</label>
             <span>H3Z2-1223</span>
-        </div>
+        </div> -->
 
         <div class="group">
             <label>Messages left</label>
-            <span>{{ messages_left }}</span>
+            <span id='m_left'>{{ messages_left }}</span>
+        </div>
+
+        <div class="group">
+            <label>Total messages</label>
+            <span id='m_total'>{{ total_messages }}</span>
         </div>
 
     </div>
 
-    <textarea placeholder="Enter a message"></textarea>
+    <textarea id="direct_message" placeholder="Enter a message"></textarea>
 
     <div id='serverAdding' class="table loadingPanel" style="width:490px;height:200px;float:right;">
-        <input class="search" type="text" name="discord_server_invite_link" placeholder="Enter server invite" />
-        <button id='addServer' class="green submit-button" type="button">Add server</button>
+        <div class='slides' id="slide1">
+            <input class="search" type="text" name="discord_server_invite_link" placeholder="Enter server invite" />
+            <button id='addServer' class="green submit-button" type="button">Add server</button>
 
-        <table style="height:calc(100% - 60px);margin-top:30px;">
-            <tbody id="server-list">
-
-                
-                {% if listed_servers.count == 0 %}
-                    <tr id='no_servers'><td>No servers added yet</td></tr>
-                {% endif %}
+            <table>
+                <tbody id="server-list" class="dm_panel_122_table">
                     
-                
-                {% for server in listed_servers %}
-                <tr>
-                    <td><img src="{{ server.icon }}" alt="">{{ server.name }}</td>
-                    <td>{{ server.members|intcomma }} <label class="avatar-icon"></label></td>
-                    <td connect_id="{{ server.uid }}"><button class="remove_server red" type="button" onclick="">Remove</button><button class="connect_server green" type="button">Connect</button></td>
-                </tr>
-                {% endfor %}
+                    {% if listed_servers.count == 0 %}
+                        <tr id='no_servers'><td>No servers added yet</td></tr>
+                    {% endif %}
+                        
+                    
+                    {% for server in listed_servers %}
+                    <tr>
+                        <td class="icon_name_side"><img src="{% if server.icon %}{{ server.icon }}{% else %}{% static 'assets/images/feature-module.png' %}{% endif %}" alt=""><a href="{% url 'dashboard:discord_server' server.get_uid %}">{{ server.name|truncatechars:13 }}</a></td>
+                        <td>{{ server.members|intcomma }} <label class="avatar-icon"></label></td>
+                        <td class="actions" connect_id="{{ server.uid }}"><a href="{% url 'dashboard:discord_server' server.get_uid %}" class="btn btn-teal">Open</a><button class="btn btn-teal connect_server">Connect</button></td>
+                    </tr>
+                    {% endfor %}
 
-            </tbody>
-        </table>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class='slides' id="slide2">
+
+            <h4>Managing Servers</h4>
+            
+            <table>
+                <tbody id="manage_list" class="dm_panel_144_table">
+                    
+                    {% if listed_servers.count == 0 %}
+                        <tr id='no_servers'><td>No servers added yet</td></tr>
+                    {% endif %}
+                        
+                    
+                    {% for server in listed_servers %}
+                    <tr>
+                        <td class="manage_select"><span uid="{{ server.uid }}"></span></td>
+                        <td class="icon_name_side"><img src="{% if server.icon %}{{ server.icon }}{% else %}{% static 'assets/images/feature-module.png' %}{% endif %}" alt=""><a href="{% url 'dashboard:discord_server' server.get_uid %}">{{ server.name|truncatechars:13 }}</a></td>
+                        <td>{{ server.members|intcomma }} <label class="avatar-icon"></label></td>
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+            <div id="manage_server_box">
+                <h4>Servers Selected: <span id="servers_selected_p">0</span></h4>
+                
+                <div class="options">
+                    <button id="dss_manage" class="btn btn-danger">Delete Selected</button>
+                </div>
+            </div>
+        </div>
+
+        <button id='manageServers' class="btn btn-teal" type="button">Manage Servers</button>
+        
         <div class="loadingLogo">
             <span><img src="{% static 'assets/images/logo.png' %}" alt=""></span>
         </div>
@@ -52,8 +94,8 @@
         <div id="blacklist-list">
             <button class="green submit-button" onclick="showBlackListSettings();" type="button">Add Blacklist</button>
 
-            <table style="height:calc(100% - 60px);margin-top:60px;">
-            <tbody id="black_list">
+            <table style="height:calc(100% - 60px);">
+            <tbody id="black_list" class="dm_panel_122_table">
 
                 {% if blacklists.count == 0 %}
                     <td id="no_bl">No blacklist added yet</td>
@@ -61,9 +103,9 @@
 
                 {% for i in blacklists %}
                     <tr>
-                        <td><img src="https://www.clipartmax.com/png/small/246-2468580_blacklist-the-blacklist.png" alt="lunar promos blacklist">{{ i.gen_name }}</td>
+                        <td><img src="https://www.clipartmax.com/png/small/246-2468580_blacklist-the-blacklist.png"><a href="{% url 'dashboard:blacklist_view' i.uid %}">{{ i.gen_name|truncatechars:13 }}</a></td>
                         <td>{{ i.count_list|intcomma }} <label class="avatar-icon"></label></td>
-                        <td blacklist_uid="{{ i.uid }}"><button class="red remove_blacklist" type="button" onclick="">Remove</button><button class="green select_blacklist" type="button" onclick="">Select</button></td>
+                        <td class="actions" blacklist_uid="{{ i.uid }}"><a href="{% url 'dashboard:blacklist_view' i.uid %}" class="btn btn-teal">Open</a><button class="btn btn-teal select_blacklist" type="button" onclick="">Select</button></td>
                     </tr>
                 {% endfor %}
 
@@ -74,10 +116,9 @@
             <span style="display:block;text-align:center;margin:-10px auto 10px -50px;">Blacklist methods</span>
 
             <div class="method">
-                <span>Blacklist a server</span>
-                <input type="text" name="blacklist_server" placeholder="Enter server invite"/>
+                <span>Blacklist name</span>
+                <input maxlength="50" type="text" name="blacklist_user_name" placeholder="A name for your blacklist"/>
             </div>
-
             <div class="method">
                 <span>Blacklist usernames</span>
                 <input id="blacklist_user_id" type="file" name="blacklist_user_id" accept="text/plain"/>
@@ -95,7 +136,7 @@
     </div>
 
     <div class="settings">
-        <span class="setting">Stop After <input type="number" name="stop_after_amount" min="0" step="1" /> Messages</span>
+        <span class="setting">Stop After <input type="number" name="stop_after_amount" min="0" step="1" value="0"/> Messages</span>
 
         <span class="setting">Add Users as Friend
             <label class="switch">
@@ -123,15 +164,21 @@
         <div class="board-bottom-right">
             <div class="progress">
                 <label>Progress</label>
-                <label style="float:right;">800 messages sent</label>
-                <progress value="66" max="100"></progress>
+                <label style="float:right;"><span id='m_sent'>{{total_sent}}</span> messages sent</label>
+                <progress id="progress_count" value="0" max="100"></progress>
             </div>
 
             <div class="start">
-                <a id="startstop" class="button" onclick="start();" style="cursor:pointer;">Start</a>
+                {% if running_message %}
+                    <a uid="{{running_message}}" id="startstop" class="button active" style="cursor:pointer;">Stop</a>
+                {% else %}
+                    <a id="startstop" class="button" style="cursor:pointer;">Start</a>
+                {% endif %}
                 <label class="button-backdrop" style="width:75px;height:35px;top:-30px;left:-5px;"></label>
             </div>
         </div>
     </div>
+
+    {{ room_name|json_script:"room-name" }}
 </div>
 {% endblock contents %}

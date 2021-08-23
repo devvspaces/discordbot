@@ -1,0 +1,51 @@
+{% extends 'mainapp/base.html' %}
+{% load static %}
+{% block contents %}
+        <div id="board">
+            
+            <div id='server'>
+
+                <div class="detail_head">
+                    <h3 class="title">{{ blacklist.gen_name }}</h3>
+                    <p class="users"><span id='user_count'>{{ blacklist.count_list }}</span> Blacklisted</p>
+                    <input type="text" id="search_input" placeholder="Search Usernames/Roles/IDs">
+                </div>
+                
+
+                <div class="table">
+                    <table>
+                        <thead>
+                            <th></th>
+                            <th>Username</th>
+                            <th>ID</th>
+                            <th>Blacklisted at</th>
+                            <th></th>
+                        </thead>
+                        <tbody>
+                            {% for i in blacklist.blacklist_set.all %}
+                            <tr uid="{{ i.id }}">
+                                <td><img src="{% static 'assets/images/team1.jpg' %}" alt=""></td>
+                                <td>{{ i.username }}</td>
+                                <td>82734589849803403</td>
+                                <td>{{ i.created }}</td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="btn btn-danger del_blacklist">Remove from blacklist</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="bottom-options">
+                    <div class="options">
+                        <a href="{{ back_url }}" class="btn btn-danger">Back</a>
+                        <button class="btn btn-muted">Settings</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+{% endblock contents %}

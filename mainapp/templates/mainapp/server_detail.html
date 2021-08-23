@@ -1,0 +1,89 @@
+{% extends 'mainapp/base.html' %}
+{% load static %}
+{% block contents %}
+        <div id="board">
+            
+            <div id='server'>
+
+                <div class="detail_head">
+                    <h3 class="title">{{ server.name }}</h3>
+                    <p class="users" id='user_count'>{{ server.count_members }}</p>
+                    <input type="text" id="search_input" placeholder="Search Usernames/Roles/IDs">
+                </div>
+                
+
+                <div class="table">
+                    <table>
+                        <thead>
+                            <th></th>
+                            <th>Username</th>
+                            <th>ID</th>
+                            <th>Role</th>
+                            <th></th>
+                        </thead>
+                        <tbody>
+                            {% for i in server.member_set.all %}
+                            <tr uid="{{ i.uid }}">
+                                <td><img src="{% if i.image %}{{ i.image }}{% else %}{% static 'assets/images/team1.jpg' %}{% endif %}" alt=""></td>
+                                <td>{{ i.username }}</td>
+                                <td>82734589849803403</td>
+                                <td>{{ i.roles }}</td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="btn btn-danger add_to_blacklist">Add to blacklist</button>
+                                        <button class="btn btn-danger remove_user">Remove from DM List</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="bottom-options">
+                    <div class="options">
+                        <button class="btn btn-muted modal_open" modal="#update_server">Update Server</button>
+                        <button class="btn btn-muted modal_open" modal="#blacklistbox">Select Blacklist</button>
+                        <button class="btn btn-teal">Apply Blacklist</button>
+                    </div>
+                    <p id="blacklist_indicator">No blacklist selected</p>
+                </div>
+            </div>
+
+            <div id="blacklistbox"  class="modal_box">
+                <h4>Select a Blacklist</h4>
+                <div class="inner">
+                    {% for i in blacklists %}
+                        <div class="item" uid="{{i.uid}}">
+                            <p>{{ i.gen_name }}</p>
+                            <p><span class="blacklist_count">{{ i.count_list }}</span> Users</p>
+                            <span class="select_blacklist"><i class="fas fa-check"></i></span>
+                        </div>
+                    {% endfor %}
+                    
+                </div>
+                
+                <div class="options">
+                    <button class="btn btn-teal">Select Blacklist</button>
+                    <button class="btn btn-muted modal_close" modal="#blacklistbox">Close</button>
+                </div>
+            </div>
+
+            <div id="update_server" class="modal_box">
+                <h4>Update Server</h4>
+                
+                <form action="" method="POST">
+                    <div class="form-item">
+                        <label for="add_link">Invite Link</label>
+                        <input required type="url" name="link" id="add_link" value="{{ server.link }}">
+                    </div>
+                </form>
+                
+                <div class="options">
+                    <button class="btn btn-teal" type="submit">Save</button>
+                    <button class="btn btn-muted modal_close" modal='#update_server' >Close</button>
+                </div>
+            </div>
+
+        </div>
+{% endblock contents %}

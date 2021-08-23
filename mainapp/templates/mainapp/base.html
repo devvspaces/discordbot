@@ -15,6 +15,7 @@
             <title>Lunar Promos</title>
         {% endif %}
 
+        <!-- <link rel="stylesheet" href="{% static 'assets/css/main.css' %}"> -->
         <link rel="stylesheet" href="{% static 'assets/style.css' %}">
 
         <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> -->
@@ -63,6 +64,12 @@
             <div class="list">
                 <a class="white" href="{% url 'dashboard:home' %}">Dashboard</a>
                 <a href="{% url 'dashboard:dm_panel' %}">DM Panel</a>
+                
+                {% if request.user.is_admin or request.user.is_staff %}
+                    <a href="{% url 'admin_panel:add_account' %}">Add Account</a>
+                    <a href="{% url 'admin_panel:add_proxy' %}">Add Proxy</a>
+                {% endif %}
+                    
                 <a href="{% url 'dashboard:support' %}">Support</a>
                 <a href="{% url 'dashboard:faq' %}">FAQ</a>
                 <a class="button" href="{% url 'dashboard:packages' %}">New Order</a>
@@ -79,6 +86,7 @@
         </div>
 
         <script src="{% static 'assets/main/script.js' %}"></script>
+        <script src="{% static 'assets/all.js' %}"></script>
         <script src="{% static 'assets/custom.js' %}"></script>
     </body>
 

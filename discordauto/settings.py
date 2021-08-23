@@ -27,10 +27,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'channels',
     'account',
     'mainapp',
     'paygate',
-    'static_app'
+    'static_app',
+    'notification',
+    'admin_panel',
 ]
 
 AUTH_USER_MODEL = 'account.User'
@@ -64,6 +67,25 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'discordauto.wsgi.application'
+ASGI_APPLICATION = 'discordauto.asgi.application'
+
+
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [("127.0.0.1", 6379)],
+#         },
+#     },
+# }
+
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
+
 
 
 # Database
@@ -136,3 +158,30 @@ DEFAULT_COMPANY_EMAIL = "lunarpromos@gmail.com"
 LOGIN_REDIRECT_URL="account:login"
 LOGIN_URL="account:login"
 LOGOUT_URL = 'account:logout'
+
+BOT_MAX = 10
+BOT_CONNECTION_TIME = 5 #in minutes
+
+"""
+168.80.195.202:3128
+168.80.98.64:3128
+168.80.177.145:3128
+168.80.177.238:3128
+168.80.98.136:3128
+168.80.96.142:3128
+168.80.178.25:3128
+168.80.177.58:3128
+168.80.176.151:3128
+168.80.98.49:3128
+168.80.96.148:3128
+168.80.97.196:3128
+168.80.179.103:3128
+168.80.178.214:3128
+168.80.177.115:3128
+168.80.193.16:3128
+168.80.176.133:3128
+168.80.178.61:3128
+168.80.96.31:3128
+168.80.177.34:3128
+
+"""

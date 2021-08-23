@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import User, Profile, DiscordAccount
+from .models import User, Profile, DiscordAccount, ProxyPort
 from .forms import UserRegisterForm
 
 
@@ -36,3 +36,4 @@ class UserAdmin(BaseUserAdmin):
 admin.site.register(User, UserAdmin)
 admin.site.register(Profile)
 admin.site.register(DiscordAccount)
+admin.site.register(ProxyPort)

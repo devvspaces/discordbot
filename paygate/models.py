@@ -18,6 +18,9 @@ class Order(models.Model):
 
     objects = OrderManager()
 
+    def profile_name(self):
+        return self.profile.discord_username
+
     def __str__(self):
         return str(self.order_id)
 
