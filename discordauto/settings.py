@@ -1,20 +1,22 @@
 from pathlib import Path
 import os
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
+SECRET_KEY = config('SECRET_KEY')
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '%tb&oljj%p01l3&tsb66h1y$frc_j8u4#bik%x%$xklkg3s*@w'
+DEBUG = config('DEBUG', default=False, cast=bool)
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+ALLOWED_HOSTS = ["147.182.172.79",]
 
-ALLOWED_HOSTS = []
+ROOT_URLCONF = f'{config("PROJECT_NAME")}.urls'
+
+WSGI_APPLICATION = f'{config("PROJECT_NAME")}.wsgi.application'
+
+ASGI_APPLICATION = f'{config("PROJECT_NAME")}.routing.application'
 
 
 # Application definition
@@ -48,7 +50,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'discordauto.urls'
+# ROOT_URLCONF = 'discordauto.urls'
 
 TEMPLATES = [
     {
@@ -66,8 +68,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'discordauto.wsgi.application'
-ASGI_APPLICATION = 'discordauto.asgi.application'
+# WSGI_APPLICATION = 'discordauto.wsgi.application'
+# ASGI_APPLICATION = 'discordauto.asgi.application'
 
 
 # CHANNEL_LAYERS = {
@@ -132,28 +134,8 @@ USE_L10N = True
 USE_TZ = True
 
 
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "assets"),
-]
-
-# STATIC_ROOT = os.path.join(BASE_DIR, "assets")
-
 COINBASE_API_VERSION = '2018-03-22'
 COINBASE_API_KEY = '1d44876e-db0f-45a2-9f9d-a5a7f71ad746'
-
-
-EMAIL_BACKEND= 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST="smtp.gmail.com"
-EMAIL_PORT= 587
-EMAIL_USE_TLS= True
-EMAIL_HOST_USER = "netrobeweb@gmail.com"
-EMAIL_HOST_PASSWORD = "wpcgtxfwmiqnlbwv"
-# Custom user defined mail username
-DEFAULT_FROM_EMAIL = "lunarpromos@gmail.com"
-DEFAULT_COMPANY_EMAIL = "lunarpromos@gmail.com"
-
-
 
 LOGIN_REDIRECT_URL="account:login"
 LOGIN_URL="account:login"
@@ -161,6 +143,56 @@ LOGOUT_URL = 'account:logout'
 
 BOT_MAX = 10
 BOT_CONNECTION_TIME = 5 #in minutes
+
+
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOO
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': config("DB_NAME"),
+        'USER': config("DB_USER"),
+        'PASSWORD': config("DB_PASSWORD"),
+        'HOST': 'localhost',
+        'PORT': '',
+    }
+}
+
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_ENDPOINT_URL = config('AWS_S3_ENDPOINT_URL')
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}
+AWS_LOCATION = config('AWS_LOCATION')
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
+#STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+STATIC_URL = 'https://%s/%s/' % (AWS_S3_ENDPOINT_URL, AWS_LOCATION)
+TEMP = os.path.join(BASE_DIR, 'temp')
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+
+EMAIL_BACKEND= 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST="smtp.gmail.com"
+EMAIL_PORT= 587
+EMAIL_USE_TLS= True
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = "lunarpromos@gmail.com <noreply@lunarpromos.com>"
+DEFAULT_COMPANY_EMAIL = "lunarpromos@gmail.com"
+
+
+BASE_URL = "http://147.182.172.79"
+
+
+
+
 
 """
 168.80.195.202:3128
