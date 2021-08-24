@@ -1,6 +1,6 @@
 from selenium import webdriver
 
-chrome_options = webdriver.ChromeOptions('/usr/local/bin/chromedriver')
+chrome_options = webdriver.ChromeOptions()
 chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--headless")
@@ -9,7 +9,7 @@ chrome_options.add_argument("--headless")
 url = 'http://www.srcmake.com/'
 
 # Creating the WebDriver object using the ChromeDriver
-driver = webdriver.Chrome(options=chrome_options)
+driver = webdriver.Chrome('/usr/local/bin/chromedriver', options=chrome_options)
 
 # Directing the driver to the defined url
 driver.get(url)
