@@ -46,8 +46,8 @@ class Driver:
         prefs = {"profile.managed_default_content_settings.images": 2}
         chrome_options.add_experimental_option("prefs", prefs)
         chrome_options.add_argument("disable-infobars")
-        chrome_options.add_argument("--disable-extensions")
-
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--headless")
 
         driver = webdriver.Chrome("/home/discordbot/mainapp/main/chromedriver.exe", options=chrome_options)

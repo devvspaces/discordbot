@@ -9,7 +9,7 @@ chrome_options.add_argument("--headless")
 url = 'http://www.srcmake.com/'
 
 # Creating the WebDriver object using the ChromeDriver
-driver = webdriver.Chrome('/usr/bin/chromedriver', options=chrome_options)
+driver = webdriver.Chrome(options=chrome_options)
 
 # Directing the driver to the defined url
 driver.get(url)
