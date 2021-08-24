@@ -255,7 +255,7 @@ class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
                 driver_instance = Driver()
                 drivers.append(driver_instance)
                 logger.debug(f'Appended the new driver, new length: {len(drivers)}')
-            except e:
+            except Exception as e:
                 err_logger.exception(e)
         return driver_instance
 
