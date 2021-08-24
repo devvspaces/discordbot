@@ -21,7 +21,7 @@ class DiscordAccountManager(models.Manager):
     def get_queryset(self):
         return DiscordAccountQuery(model=self.model, using=self._db)
     def most_unused(self):
-        return self.get_queryset().most_unused()
+        return self.get_queryset().filter(expired_token=False).most_unused()
 
 
 class ProxyPortQuery(models.QuerySet, MostUnused):

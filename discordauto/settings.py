@@ -195,6 +195,46 @@ BASE_URL = "http://147.182.172.79"
 
 
 
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'loggers': {
+        'basic': {
+            'handlers': ['basic_h'],
+            'level': 'DEBUG',
+        },
+        'basic.error': {
+            'handlers': ['basic_e'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+    },
+    'handlers': {
+        'basic_h': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': './logs/debug.log',
+            'formatter' : 'simple',
+        },
+        'basic_e': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'filename': './logs/error.log',
+            'formatter' : 'simple',
+        },
+    },
+    'formatters':{
+        'simple': {
+            'format': '{levelname} : {asctime} : {message}',
+            'style': '{',
+        }
+    }
+}
+
+
+
+
 """
 168.80.195.202:3128
 168.80.98.64:3128
@@ -218,3 +258,5 @@ BASE_URL = "http://147.182.172.79"
 168.80.177.34:3128
 
 """
+
+

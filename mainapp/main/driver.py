@@ -1,4 +1,8 @@
 import time, threading
+import logging
+# Create the logger and set the logging level
+logger = logging.getLogger('basic')
+err_logger = logging.getLogger('basic.error')
 
 # Required for channel communication
 from channels.layers import get_channel_layer
@@ -64,7 +68,7 @@ class Driver:
 
         self.event = None
         
-        print('Created driver now')
+        logger.debug('Created driver now')
 
     def set_working_complete(self, event):
         for i in range(settings.BOT_CONNECTION_TIME * 60):
@@ -80,6 +84,7 @@ class Driver:
         account = DiscordAccount.objects.most_unused()
         try:
             if account:
+                logger.debug('Got an account')
                 self.driver.get('https://discord.com/login')
                 js = 'function login(token) {setInterval(() => {document.body.appendChild(document.createElement `iframe`).contentWindow.localStorage.token = `"${token}"`}, 50);setTimeout(() => {location.reload();}, 500);}'
                 WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, "button[type='button']")))
@@ -95,9 +100,10 @@ class Driver:
 
                 return True
         except (WebDriverException, TimeoutError) as e:
-            print(e)
+            err_logger.exception(e)
 
         # Alert admins
+        logger.debug('No account to use')
         return False
 
 
@@ -140,7 +146,7 @@ class Driver:
             self.working = False
         except Exception as e:
             e
-            print(e)
+            err_logger.exception(e)
             return
 
         return True
@@ -156,6 +162,8 @@ class Driver:
         if not self.is_authenticated:
             response = self.login_account()
             if not response:
+                logger.debug('User could not login')
+                self.working = False
                 return
         
         self.driver.get(discord_server.link)
@@ -186,11 +194,25 @@ class Driver:
         sent = []
         real_names = []
         created = []
+
         
-        members = self.find_webelement(wait_time = 10, count = 100, find_function=self.driver.find_elements_by_css_selector, selector='div.member-3-YXUe', is_list=True)
+        members = self.find_webelement(wait_time = 10, count = 2, find_function=self.driver.find_elements_by_css_selector, selector='div.member-3-YXUe', is_list=True)
         # If no members where found
-        if members is None:
-            return
+        if (members is None) or (len(members) == 0):
+            logger.debug('No members found')
+            invalid_title = self.find_webelement(wait_time = 1, count = 5, find_function=self.driver.find_element_by_css_selector, selector="h3.title-jXR8lp")
+            # Check if the discord account being used is expired
+            if invalid_title.text.lower() == 'Unable to accept invite'.lower():
+                logger.debug('Token has expired')
+                if self.account_id:
+                    account = DiscordAccount.objects.get(id=self.account_id)
+                    account.expired_token = True
+                    account.save()
+                    logger.debug(f'Updated expired token, account_id: {self.account_id}')
+                return 'Sorry we can not connect to any server right now, try again later'
+            
+            logger.debug('Returned none to view because no members was found')
+            return None
 
         completed = True
         while completed:
@@ -203,10 +225,10 @@ class Driver:
                 if len(members) <= len(sent):
                     break
 
-            print('Scraped members', len(members))
-            print('Scraped users', len(sent))
+            logger.debug(f'Scraped members {len(members)}')
+            logger.debug(f'Scraped user {len(sent)}')
 
-            for i in members[:5]:
+            for i in members:
                 # Get the general username
                 try:
                     item = self.find_webelement(wait_time=1, count=20, find_function=i.find_element_by_css_selector, selector='div.nameAndDecorators-5FJ2dg')
@@ -235,7 +257,7 @@ class Driver:
                         real_names.append(name_data)
                         sent.append(name)
 
-                        print('Added a new name')
+                        logger.debug(f'Added a new name {name}')
                         
                         if name_data not in created:
                             # Save or get the name here
@@ -262,8 +284,8 @@ class Driver:
                 # Find the members on the page again, if 
                 members = None
         
-        print('Broke loop and got here')
-        print(real_names, sent, created)
+        logger.debug('Broke loop and got here')
+        logger.debug(f'{real_names}, {sent}, {created}')
         
         
         # Create members with the real names
@@ -303,7 +325,7 @@ class Driver:
                     # Run the function passed with the selecting argument
                     time.sleep(wait_time)
                     el = find_function(selector)
-                    print(f'Waited {wait_time}')
+                    # logger.debug(f'Waited {wait_time}')
                     if is_list:
                         if len(el) == 0:
                             find_count += 1
@@ -312,7 +334,7 @@ class Driver:
                     else:
                         break
                 except NoSuchElementException:
-                    print('Got here for', selector)
+                    # logger.debug('Got here for', selector)
                     find_count += 1
 
         return el
@@ -388,7 +410,7 @@ class Driver:
                 # time.sleep(delay)
                 time.sleep(1)
         
-        print('Finished that, Got here')
+        logger.debug('Finished that, Got here')
         
         # Update message model and Send completed message to websocket that it is completed
         message.completed = True
@@ -403,7 +425,7 @@ class Driver:
         return
 
     def quit(self):
-        print('Deleted the driver')
+        logger.debug('Deleted the driver')
         self.driver.quit()
         del self.driver
 
