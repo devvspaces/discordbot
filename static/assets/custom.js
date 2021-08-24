@@ -795,7 +795,7 @@ $('#dss_manage').on('click', function(){
     let sels = checkManageSelected()
 
 
-    console.log(sels)
+    // console.log(sels)
 
     let uids = []
     sels.forEach(i=>{
@@ -825,7 +825,7 @@ $('#dss_manage').on('click', function(){
                 }, 1000)
                 // Find the server list items with this uid
                 let val = $("#server-list tr td[connect_id={}]".format(i.getAttribute('uid'))).parent()
-                console.log(val)
+                // console.log(val)
                 val.remove()
             })
 
@@ -860,7 +860,7 @@ $("#update_server button[type='submit']").on('click', function(event){
     let form = document.querySelector('#update_server form')
     var data = new FormData($(form).get(0));
     
-    console.log(data)
+    // console.log(data)
 
     $.ajax({
         url: window.location.href,
