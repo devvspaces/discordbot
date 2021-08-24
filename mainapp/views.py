@@ -1,5 +1,10 @@
 import time
 import threading
+import logging
+# Create the logger and set the logging level
+logger = logging.getLogger('basic')
+err_logger = logging.getLogger('basic.error')
+
 from django.contrib.sites.shortcuts import get_current_site
 
 from django.shortcuts import get_object_or_404, render, redirect
@@ -156,7 +161,6 @@ class BlacklistDetail(LoginRequiredMixin, DetailView, AjaxResponders):
             return self.json_err_response('You request could not be processed')
     
 
-
 class Packages(LoginRequiredMixin, ListView):
     template_name = 'mainapp/packages.html'
     extra_context = {
@@ -201,6 +205,7 @@ class Faq(LoginRequiredMixin, TemplateView):
 
 drivers = []
 events_dict = dict()
+
 class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
     template_name = 'mainapp/dmpanel.html'
     extra_context = {
@@ -227,21 +232,32 @@ class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
         
         return context
     
-    def get_driver(self, connected_id=None):
+    def get_driver(self, connected_id=None, just_checking=False):
         driver_instance = None
-        if len(drivers) > 0:
+        for i in drivers:
+            if connected_id is not None:
+                if i.connected_to == connected_id:
+                    driver_instance = i
+                    logger.debug(f'Got the right one {i.event}')
+                    break
+            elif i.working == False:
+                driver_instance = i
+                break
+
+        if just_checking and (connected_id is not None) and (driver_instance is None):
             for i in drivers:
-                if connected_id is not None:
-                    print(i.connected_to, connected_id)
-                    if i.connected_to == connected_id:
-                        driver_instance = i
-                        print('Got the right one', i.event)
-                        break
-                elif i.working == False:
+                if i.working == False:
                     driver_instance = i
                     break
+
         if (driver_instance is None) and (len(drivers) <= settings.BOT_MAX):
-            driver_instance = Driver()
+            try:
+                driver_instance = Driver()
+                drivers.append(driver_instance)
+                logger.debug(f'Appended the new driver, new length: {len(drivers)}')
+            except e:
+                err_logger.exception(e)
+                raise e
         return driver_instance
 
     def get(self, request, *args, **kwargs):
@@ -308,8 +324,9 @@ class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
                         response = driver_instance.parse_server_basic(server)
 
                         # Add the driver to memory
-                        if driver_instance not in drivers:
-                            drivers.append(driver_instance)
+                        # if driver_instance not in drivers:
+                        #     drivers.append(driver_instance)
+                        #     logger.debug(f'Appended the new driver, new length: {len(drivers)}')
 
                         if response != True:
                             server.delete()
@@ -346,18 +363,19 @@ class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
                     # time.sleep(2)
 
                     # Get usable driver and parse out users
-                    driver_instance = self.get_driver()
+                    driver_instance = self.get_driver(connected_id=request.user.id, just_checking=True)
                     if driver_instance is None:
                         return self.json_err_response('There are currently no bots available')
+                    
+                    # if driver_instance not in drivers:
+                    #     drivers.append(driver_instance)
+                    #     logger.debug(f'Appended the new driver, new length: {len(drivers)}')
 
                     # Just for the moment, the below will be commented out and default data will be added
                     response = driver_instance.parse_users(discord_server)
 
                     if response != True:
                         return self.json_err_response(response)
-                    
-                    if driver_instance not in drivers:
-                        drivers.append(driver_instance)
                     
                     return JsonResponse({
                         'data': 'success',
@@ -502,7 +520,7 @@ class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
                 # Get the driver instance and send the message
                 driver_instance = self.get_driver(connected_id=self.request.user.id)
                 if driver_instance is None:
-                    return self.json_err_response('Please connect to a server again')
+                    return self.json_err_response('You have to connect the server again, it has passed 5 mins')
 
                 # Create an event for this
                 new_event = threading.Event()

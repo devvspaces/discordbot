@@ -162,6 +162,46 @@ LOGOUT_URL = 'account:logout'
 BOT_MAX = 10
 BOT_CONNECTION_TIME = 5 #in minutes
 
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'loggers': {
+        'basic': {
+            'handlers': ['basic_h'],
+            'level': 'DEBUG',
+        },
+        'basic.error': {
+            'handlers': ['basic_e'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+    },
+    'handlers': {
+        'basic_h': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': './logs/debug.log',
+            'formatter' : 'simple',
+        },
+        'basic_e': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'filename': './logs/error.log',
+            'formatter' : 'simple',
+        },
+    },
+    'formatters':{
+        'simple': {
+            'format': '{levelname} : {asctime} : {message}',
+            'style': '{',
+        }
+    }
+}
+
+
+
+
 """
 168.80.195.202:3128
 168.80.98.64:3128
@@ -185,3 +225,5 @@ BOT_CONNECTION_TIME = 5 #in minutes
 168.80.177.34:3128
 
 """
+
+
