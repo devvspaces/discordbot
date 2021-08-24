@@ -1,8 +1,10 @@
   
 import os
 from decouple import config
+import django
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', f'{config("PROJECT_NAME")}.settings')
+django.setup()
 
 from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
