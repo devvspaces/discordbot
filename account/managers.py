@@ -3,8 +3,11 @@ from django.db import models
 
 class MostUnused(object):
     def most_unused(self):
+        # Get the active ones only
+        queryset = self.filter(active=True)
+        
         # Find the discord account instance that is most unused
-        min_value = self.first().use_count if self.first() else 0
+        min_value = queryset.first().use_count if queryset.first() else 0
         min_instance = ''
         for i in self:
             if i.use_count <= min_value:

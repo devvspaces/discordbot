@@ -70,16 +70,6 @@ class Driver:
         
         logger.debug('Created driver now')
 
-    def set_working_complete(self, event):
-        for i in range(settings.BOT_CONNECTION_TIME * 60):
-            time.sleep(i)
-            if event.isSet():
-                return
-
-        self.connected_to = None
-        self.working = False
-        self.event = None
-
     def login_account(self):
         account = DiscordAccount.objects.most_unused()
         try:
@@ -123,6 +113,7 @@ class Driver:
 
             # If the server name contains invalid, this means the server link is invalid
             if server_icon is None:
+                self.working = False
                 return f'The discord server invite may be expired, invalid, or we do not have permission to join.'
 
             server_name = self.driver.find_element_by_css_selector("h3.title-jXR8lp").text
@@ -130,6 +121,7 @@ class Driver:
 
             # Check if the server already exists
             if discord_server.user.discordserver_set.filter(name__exact=server_name).exists():
+                self.working = False
                 return 'Server has already been added'
 
             # Save data in to discord_server
@@ -145,7 +137,7 @@ class Driver:
 
             self.working = False
         except Exception as e:
-            e
+            self.working = False
             err_logger.exception(e)
             return
 
@@ -153,10 +145,6 @@ class Driver:
     
 
     def parse_users(self, discord_server):
-        if self.working:
-            return False
-
-        # try:
         self.working = True
 
         if not self.is_authenticated:
@@ -185,6 +173,7 @@ class Driver:
 
         # If invalid is true return message
         if invalid:
+            self.working = False
             return f'The discord server invite may be expired, invalid, or we do not have permission to join. DISCORD SERVER INVITE LINK ({discord_server.link})'
 
         # Click to go to page
@@ -212,6 +201,7 @@ class Driver:
                 return 'Sorry we can not connect to any server right now, try again later'
             
             logger.debug('Returned none to view because no members was found')
+            self.working = False
             return None
 
         completed = True
@@ -285,7 +275,7 @@ class Driver:
                 members = None
         
         logger.debug('Broke loop and got here')
-        logger.debug(f'{real_names}, {sent}, {created}')
+        logger.debug(f'Real names{len(set(real_names))}, {len(set(sent))}, {len(set(created))}')
         
         
         # Create members with the real names
@@ -299,19 +289,7 @@ class Driver:
         #     for b in real_name:
         #         Member.objects.get_or_create(username=b, discord_server=a)
 
-        # Make this connected to the user id for specified time
-        self.connected_to = discord_server.user.id
-
-        # Create event to automatically kill the thread
-        e1 = threading.Event()
-        self.event = e1
-
-        t1 = threading.Thread(target=self.set_working_complete, args=(e1, ))
-        t1.start()
-
-        # except Exception as e:
-        #     print(e)
-        #     return
+        self.working = False
 
         return True
 
@@ -350,9 +328,7 @@ class Driver:
         return True
 
     def send_message(self, message, event, messages_left):
-        # Set the messaging event
-        if self.event:
-            self.event.set()
+        self.working = True
 
         # Get the users, blacklists and discord_server link
         discord = message.server
@@ -364,6 +340,8 @@ class Driver:
         if discord is None:
             # Send message through web socket
             send_channel_message(user_name, message='Discord Server Error')
+
+            self.working = False
             return
 
         discord_members = [i.username for i in  discord.member_set.all()]
@@ -386,6 +364,7 @@ class Driver:
             if messages_left <= 0:
                 time.sleep(3)
                 send_channel_message(user_name, message='Completed sending messages', mtype='completed_message')
+                self.working = False
                 return
 
             # Send a message
@@ -418,9 +397,7 @@ class Driver:
         time.sleep(3)
         send_channel_message(user_name, message='Completed sending messages', mtype='completed_message')
 
-        self.connected_to = None
         self.working = False
-        self.event = None
 
         return
 
