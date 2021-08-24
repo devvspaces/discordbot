@@ -33,7 +33,12 @@ class UserAdmin(BaseUserAdmin):
 	filter_horizontal = ()
 
 
+class DiscordAccountAdmin(admin.ModelAdmin):
+	list_display = ('email', 'uid', 'active', 'use_count', 'expired_token', )
+	list_editable = ('active', 'expired_token', )
+
+
 admin.site.register(User, UserAdmin)
 admin.site.register(Profile)
-admin.site.register(DiscordAccount)
+admin.site.register(DiscordAccount, DiscordAccountAdmin)
 admin.site.register(ProxyPort)

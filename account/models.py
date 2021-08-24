@@ -101,7 +101,7 @@ class DiscordAccount(models.Model):
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=200)
     token = models.CharField(max_length=200, unique=True)
-    active = models.BooleanField(default=False)
+    active = models.BooleanField(default=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     use_count = models.IntegerField(default=0)
     expired_token = models.BooleanField(default=False)

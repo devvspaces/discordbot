@@ -232,23 +232,12 @@ class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
         
         return context
     
-    def get_driver(self, connected_id=None, just_checking=False):
+    def get_driver(self):
         driver_instance = None
         for i in drivers:
-            if connected_id is not None:
-                if i.connected_to == connected_id:
-                    driver_instance = i
-                    logger.debug(f'Got the right one {i.event}')
-                    break
-            elif i.working == False:
+            if i.working == False:
                 driver_instance = i
                 break
-
-        if just_checking and (connected_id is not None) and (driver_instance is None):
-            for i in drivers:
-                if i.working == False:
-                    driver_instance = i
-                    break
 
         if (driver_instance is None) and (len(drivers) <= settings.BOT_MAX):
             try:
@@ -257,6 +246,7 @@ class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
                 logger.debug(f'Appended the new driver, new length: {len(drivers)}')
             except Exception as e:
                 err_logger.exception(e)
+
         return driver_instance
 
     def get(self, request, *args, **kwargs):
@@ -345,17 +335,10 @@ class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
                 req_type = data.get('req_type')
 
                 if req_type == 'connect':
-                    # Remove below when done testing
-                    # time.sleep(2)
-
                     # Get usable driver and parse out users
-                    driver_instance = self.get_driver(connected_id=request.user.id, just_checking=True)
+                    driver_instance = self.get_driver()
                     if driver_instance is None:
                         return self.json_err_response('There are currently no bots available')
-                    
-                    # if driver_instance not in drivers:
-                    #     drivers.append(driver_instance)
-                    #     logger.debug(f'Appended the new driver, new length: {len(drivers)}')
 
                     # Just for the moment, the below will be commented out and default data will be added
                     response = driver_instance.parse_users(discord_server)
@@ -504,9 +487,9 @@ class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
                 message.save()
                 
                 # Get the driver instance and send the message
-                driver_instance = self.get_driver(connected_id=self.request.user.id)
+                driver_instance = self.get_driver()
                 if driver_instance is None:
-                    return self.json_err_response('You have to connect the server again, it has passed 5 mins')
+                    return self.json_err_response('There are not bots available now, try again later')
 
                 # Create an event for this
                 new_event = threading.Event()
