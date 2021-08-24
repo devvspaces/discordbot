@@ -257,7 +257,6 @@ class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
                 logger.debug(f'Appended the new driver, new length: {len(drivers)}')
             except e:
                 err_logger.exception(e)
-                raise e
         return driver_instance
 
     def get(self, request, *args, **kwargs):
@@ -307,29 +306,16 @@ class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
                             icon = obj.icon,
                         )
                     else:
-                        server = DiscordServer.objects.create(link=discord_server_invite_link, user=request.user)
-                        
-
-                        # ==================================
-
-                        # server.name = 'Demo name'
-                        # server.members = 233
-                        # server.save()
-                        # time.sleep(1)
-
-                        # ==================================
                         driver_instance = self.get_driver()
                         if driver_instance is None:
                             return self.json_err_response('There are currently no bots available')
+
+                        # Bot found
+                        server = DiscordServer(link=discord_server_invite_link, user=request.user)
+
                         response = driver_instance.parse_server_basic(server)
 
-                        # Add the driver to memory
-                        # if driver_instance not in drivers:
-                        #     drivers.append(driver_instance)
-                        #     logger.debug(f'Appended the new driver, new length: {len(drivers)}')
-
                         if response != True:
-                            server.delete()
                             return self.json_err_response(response)
 
                 return JsonResponse({
