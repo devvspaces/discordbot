@@ -208,10 +208,11 @@ class Driver:
 
             if members is None:
                 # =======================
-                break
+                # break
                 # =======================
                 members = [i for i in self.driver.find_elements_by_css_selector('div.member-3-YXUe') if i.text.find('BOT')==-1]
                 if len(members) <= len(sent):
+                    logger.debug('Broke the right way because members was less than or equal to sent')
                     break
 
             logger.debug(f'Scraped members {len(members)}')
@@ -227,6 +228,7 @@ class Driver:
                         continue
                 except StaleElementReferenceException:
                     # If webelements session have expired, set members to none to rescrape
+                    logger.debug('Members became stale')
                     members = None
                     break
 
