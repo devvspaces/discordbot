@@ -609,17 +609,19 @@ try {
     chatSocket.onmessage = function(e) {
         const data = JSON.parse(e.data);
 
+        let startstop = document.getElementById('startstop')
+
         if (data.type == 'message_update'){
             let count = parseInt(data.count);
             m_left.innerText = parseInt(m_left.innerText) - count
             m_sent.innerText = parseInt(m_sent.innerText) + count
             updateProgress()
         } else if (data.type == 'completed_message'){
-            let startstop = document.getElementById('startstop')
             $(startstop).removeClass('active')
             textLoad('Start')
             startstop.removeAttribute('uid')
         }
+        
         if (data.message.length > 0){
             togglePopup(data.message)
         }

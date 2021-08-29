@@ -216,8 +216,9 @@ class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
         context = super().get_context_data(**kwargs)
         context["listed_servers"] = self.request.user.discordserver_set.all()
 
-        total_sent = DirectMessage.objects.filter().count_sent()
-        total_messages = Order.objects.filter(profile=self.request.user.profile).count_dm()
+        user_profile = self.request.user.profile
+        total_sent = DirectMessage.objects.filter(profile=user_profile).count_sent()
+        total_messages = Order.objects.filter(profile=user_profile).count_dm()
         context['total_messages'] = total_messages
         context['total_sent'] = total_sent
         context['messages_left'] = total_messages - total_sent
@@ -246,6 +247,8 @@ class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
                 logger.debug(f'Appended the new driver, new length: {len(drivers)}')
             except Exception as e:
                 err_logger.exception(e)
+            
+        logger.debug(f'Bot that was found: {driver_instance}')
 
         return driver_instance
 
@@ -340,15 +343,15 @@ class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
                     if driver_instance is None:
                         return self.json_err_response('There are currently no bots available')
 
-                    # Just for the moment, the below will be commented out and default data will be added
-                    response = driver_instance.parse_users(discord_server)
+                    # This is to get the online members in the server and its also updates the server details in the database
+                    response = driver_instance.get_server_details(discord_server)
 
-                    if response != True:
+                    if not isinstance(response, int):
                         return self.json_err_response(response)
                     
                     return JsonResponse({
                         'data': 'success',
-                        'message':f'Server is connected for {settings.BOT_CONNECTION_TIME} minutes, {discord_server.member_set.count()} members parsed to receive messages'}, status=200)
+                        'message':f"Discord server is successfully connected, {response} members are available to receive messages"}, status=200)
 
                 elif req_type == 'remove':
                     discord_server.delete()
@@ -387,8 +390,6 @@ class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
                     }}, status=200)
             
             elif send_dm == 'true':
-                time.sleep(1)
-
                 # Get the needed data
                 blacklist_uid = data.get('blacklist_uid')
                 connect_uid = data.get('connect_uid')
@@ -421,9 +422,9 @@ class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
                 try:
                     if connect_uid:
                         server = DiscordServer.objects.get(uid=connect_uid)
-                        if server.count_members() == 0:
+                        if server.members <= 0:
                             valid = False
-                            validation_errors.append('Server selected contains no member')
+                            validation_errors.append('Server selected contains no members')
                     else:
                         valid = False
                         validation_errors.append('You must connect a server')
@@ -491,10 +492,11 @@ class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
                 if driver_instance is None:
                     return self.json_err_response('There are not bots available now, try again later')
 
+
                 # Create an event for this
                 new_event = threading.Event()
 
-                t1 = threading.Thread(target=driver_instance.send_message, args=(message, new_event, messages_left))
+                t1 = threading.Thread(target=driver_instance.send_message, args=(message, new_event))
                 t1.start()
 
                 # Add the event to dict
@@ -506,6 +508,8 @@ class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
                     'message_uid': message.uid,
                     'message': 'Started sending message'
                     }, status=200)
+
+                
            
             elif blacklist_uid:
                 # Verify the blacklist_uid

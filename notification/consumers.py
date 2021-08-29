@@ -1,5 +1,13 @@
 # chat/consumers.py
 import json
+
+import logging
+
+# Create the logger and set the logging level
+logger = logging.getLogger('basic')
+err_logger = logging.getLogger('basic.error')
+
+
 from datetime import datetime
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
@@ -32,7 +40,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         mtype = event['mtype']
         count = event['count']
 
-        print('Channel got the message')
+        logger.debug('Consumer sent message to listeners')
 
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
