@@ -57,6 +57,7 @@ class Driver:
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--disable-native-events")
 
         driver = webdriver.Chrome(options=chrome_options)
 
@@ -418,15 +419,15 @@ class Driver:
                             i.click()
                         except ElementClickInterceptedException:
                             logger.debug('Had to use script')
-                            # self.driver.execute_script("arguments[0].click();", i)
+                            self.driver.execute_script("arguments[0].click();", i)
                             # If element can't be clicked
-                            sent.append(name)
-                            continue
+                            # sent.append(name)
+                            # continue
                         
                         
                         # Find the text element ============
-                        # layers = self.find_webelement(wait_time=1, count=20, find_function=self.driver.find_elements_by_css_selector, selector='.layer-v9HyYc', is_list=True)
-                        # logger.debug(f'Found {len(layers)} divs')
+                        layers = self.find_webelement(wait_time=1, count=20, find_function=self.driver.find_elements_by_css_selector, selector='.layer-v9HyYc', is_list=True)
+                        logger.debug(f'Found {len(layers)} divs')
                         # for layer in layers:
                         #     logger.debug(f'\n\n{layer.get_attribute("innerHTML")}\n\n')
                         # return self.end_message(message, 'Broke it all for testing')
