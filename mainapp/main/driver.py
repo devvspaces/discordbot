@@ -55,8 +55,9 @@ class Driver:
         chrome_options.add_experimental_option("prefs", prefs)
         chrome_options.add_argument("disable-infobars")
         chrome_options.add_argument("--disable-extensions")
+        chrome_options.add_argument('--disable-gpu')
 
-        # chromeOptions.add_argument("--headless")
+        chrome_options.add_argument("--headless")
         driver = webdriver.Chrome("C:/Users/HP6460B/discordauto/mainapp/main/chromedriver.exe", options=chrome_options)
 
         self.driver = driver
@@ -402,8 +403,6 @@ class Driver:
                         break
                     # End of getting general username ================
 
-
-
                     # Test if name is available, if user hasn't been processed before and if user is not a BOT
                     if name and (name not in sent) and (name.find('BOT')==-1):
                         # Click the member to send a message and get details
@@ -412,8 +411,13 @@ class Driver:
                         except ElementClickInterceptedException:
                             self.driver.execute_script("arguments[0].click();", i)
                         
+                        
                         # Find the text element ============
-                        real_name = self.find_webelement(wait_time=1, count=20, find_function=self.driver.find_element_by_css_selector, selector='div.headerText-1vVs-U > div.nameTag-m8r81H')
+                        layer = self.find_webelement(wait_time=1, count=20, find_function=self.driver.find_element_by_css_selector, selector='.layer-v9HyYc')
+                        logger.debug(f'\n\n{layer.get_attribute("innerHTML")}\n\n')
+                        return self.end_message(message, 'Broke it all for testing')
+
+                        real_name = self.find_webelement(wait_time=1, count=20, find_function=self.driver.find_element_by_css_selector, selector='div.nameTag-m8r81H')
                         if real_name is not None:
                             name_data = real_name.text
 
