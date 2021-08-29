@@ -417,20 +417,21 @@ class Driver:
                         # Click the member to send a message and get details
                         try:
                             i.click()
-                        except ElementClickInterceptedException:
+                        except ElementClickInterceptedException as e:
                             logger.debug('Had to use script')
+                            err_logger.exception(e)
                             self.driver.execute_script("arguments[0].click();", i)
+                            return self.end_message(message, 'Broke it all for testing')
                             # If element can't be clicked
                             # sent.append(name)
                             # continue
                         
                         
                         # Find the text element ============
-                        layers = self.find_webelement(wait_time=1, count=20, find_function=self.driver.find_elements_by_css_selector, selector='.layer-v9HyYc', is_list=True)
-                        logger.debug(f'Found {len(layers)} divs')
+                        # layers = self.find_webelement(wait_time=1, count=20, find_function=self.driver.find_elements_by_css_selector, selector='.layer-v9HyYc', is_list=True)
+                        # logger.debug(f'Found {len(layers)} divs')
                         # for layer in layers:
                         #     logger.debug(f'\n\n{layer.get_attribute("innerHTML")}\n\n')
-                        # return self.end_message(message, 'Broke it all for testing')
 
                         real_name = self.find_webelement(wait_time=1, count=20, find_function=self.driver.find_element_by_css_selector, selector='div.nameTag-m8r81H')
                         if real_name is not None:
