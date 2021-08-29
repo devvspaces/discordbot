@@ -209,6 +209,8 @@ class Driver:
             find_count = 0
             while find_count < count:
 
+                logger.debug(f'CURRENT COUNT: {find_count} --> Condition: {count}')
+
                 try:
                     # Run the function passed with the selecting argument
                     el = find_function(selector)
@@ -283,6 +285,10 @@ class Driver:
         stop = message.message_stop
         message_text = message.message
         # =================================================
+
+        logger.debug(f'Message INFO: {discord.link}')
+        logger.debug(f'Message INFO: {discord.name}')
+        logger.debug(f'Message INFO: {user_name}')
 
         try:
             # Check if a discord server is connected to the message
@@ -390,11 +396,13 @@ class Driver:
 
                     # Getting the general username
                     try:
+                        logger.debug('Trying to find a name again')
                         item = self.find_webelement(wait_time=1, count=20, find_function=i.find_element_by_css_selector, selector='div.nameAndDecorators-5FJ2dg')
                         if item:
                             name = item.text
                             logger.debug(f'Got a name --> {name}')
                         else:
+                            logger.debug('Continued to the next one')
                             continue
                     except StaleElementReferenceException:
                         # If webelements session have expired, set members to none to rescrape
