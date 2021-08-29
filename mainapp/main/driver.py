@@ -53,7 +53,7 @@ class Driver:
         # Other driver settings
         prefs = {"profile.managed_default_content_settings.images": 2}
         chrome_options.add_experimental_option("prefs", prefs)
-        chrome_options.add_argument("disable-infobars")
+        chrome_options.add_argument("--disable-infobars")
         chrome_options.add_argument("--disable-extensions")
         chrome_options.add_argument('--disable-gpu')
 
@@ -414,9 +414,9 @@ class Driver:
                         
                         
                         # Find the text element ============
-                        layer = self.find_webelement(wait_time=1, count=20, find_function=self.driver.find_element_by_css_selector, selector='.layer-v9HyYc')
-                        logger.debug(f'\n\n{layer.get_attribute("innerHTML")}\n\n')
-                        return self.end_message(message, 'Broke it all for testing')
+                        # layer = self.find_webelement(wait_time=1, count=20, find_function=self.driver.find_element_by_css_selector, selector='.layer-v9HyYc')
+                        # logger.debug(f'\n\n{layer.get_attribute("innerHTML")}\n\n')
+                        # return self.end_message(message, 'Broke it all for testing')
 
                         real_name = self.find_webelement(wait_time=1, count=20, find_function=self.driver.find_element_by_css_selector, selector='div.nameTag-m8r81H')
                         if real_name is not None:
