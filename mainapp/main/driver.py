@@ -487,7 +487,7 @@ class Driver:
                                 # Wait for the time delay
                                 delay = message.delay
                                 # **********Remove this when in production 3@3
-                                delay = 5
+                                delay = 1
                                 # ****************************************
                                 time.sleep(delay)
                             else:
