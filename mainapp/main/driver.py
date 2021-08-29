@@ -409,6 +409,7 @@ class Driver:
                         try:
                             i.click()
                         except ElementClickInterceptedException:
+                            logger.debug('Had to use script')
                             self.driver.execute_script("arguments[0].click();", i)
                         
                         
