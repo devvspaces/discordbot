@@ -434,17 +434,17 @@ class Driver:
                             # self.driver.maximize_window()
                             # self.driver.set_window_size(1920, 1080)
 
-                            logger.debug(f'After --> The window size: {self.driver.get_window_size()}')
-                            return self.end_message(message, 'Broke it all for testing')
+                            # logger.debug(f'After --> The window size: {self.driver.get_window_size()}')
+                            # return self.end_message(message, 'Broke it all for testing')
                             # If element can't be clicked
                             # sent.append(name)
                             # continue
 
 
                             # Test to try to delete the element first
-                            # js = "var aa=document.getElementsByClassName('classname')[0];aa.parentNode.removeChild(aa)"
-                            # self.driver.execute_script(js)
-                            # continue
+                            js = "var aa=document.querySelector('backdrop-1wrmKB');aa.remove()"
+                            self.driver.execute_script(js)
+                            continue
                         
                         
                         # Find the text element ============
