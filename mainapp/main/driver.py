@@ -75,6 +75,7 @@ class Driver:
         self.event = None
         
         logger.debug('Created driver now')
+        logger.debug(f'The window size: {self.driver.get_window_size()}')
 
 
     def login_account(self):
@@ -419,9 +420,12 @@ class Driver:
                         try:
                             i.click()
                         except ElementClickInterceptedException as e:
+                            logger.debug(f'Before --> The window size: {self.driver.get_window_size()}')
                             logger.debug('Had to use script')
                             err_logger.exception(e)
                             self.driver.execute_script("arguments[0].click();", i)
+                            self.driver.maximize_window()
+                            logger.debug(f'After --> The window size: {self.driver.get_window_size()}')
                             # return self.end_message(message, 'Broke it all for testing')
                             # If element can't be clicked
                             # sent.append(name)
