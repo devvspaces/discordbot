@@ -58,6 +58,7 @@ class Driver:
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--start-maximized")
         chrome_options.add_argument("--headless")
+        chrome_options.add_argument('window-size=1920x1080')
         # chrome_options.add_argument("--disable-native-events")
 
         driver = webdriver.Chrome(options=chrome_options)
@@ -75,6 +76,7 @@ class Driver:
         self.event = None
         
         logger.debug('Created driver now')
+        self.driver.set_window_size(1920, 1080)
         logger.debug(f'The window size: {self.driver.get_window_size()}')
 
 
@@ -329,6 +331,8 @@ class Driver:
             # Click to go to discord server page
             server_connect.click()
 
+            time.sleep(10)
+
 
             # Get the members on the discord page
             members = self.find_webelement(wait_time = 1, count = 40, find_function=self.driver.find_elements_by_css_selector, selector='div.member-3-YXUe', is_list=True)
@@ -422,9 +426,13 @@ class Driver:
                         except ElementClickInterceptedException as e:
                             logger.debug(f'Before --> The window size: {self.driver.get_window_size()}')
                             logger.debug('Had to use script')
+
                             err_logger.exception(e)
+
                             self.driver.execute_script("arguments[0].click();", i)
                             self.driver.maximize_window()
+                            self.driver.set_window_size(1920, 1080)
+
                             logger.debug(f'After --> The window size: {self.driver.get_window_size()}')
                             # return self.end_message(message, 'Broke it all for testing')
                             # If element can't be clicked
