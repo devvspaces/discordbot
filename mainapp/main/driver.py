@@ -442,7 +442,7 @@ class Driver:
 
 
                             # Test to try to delete the element first
-                            js = "var aa=document.querySelector('backdrop-1wrmKB');aa.remove()"
+                            js = "var aa=document.querySelector('.backdrop-1wrmKB');aa.remove()"
                             self.driver.execute_script(js)
                             continue
                         
