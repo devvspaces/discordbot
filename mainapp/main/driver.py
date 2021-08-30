@@ -56,8 +56,9 @@ class Driver:
         chrome_options.add_argument("disable-infobars")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--start-maximized")
         chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--disable-native-events")
+        # chrome_options.add_argument("--disable-native-events")
 
         driver = webdriver.Chrome(options=chrome_options)
 
@@ -421,9 +422,15 @@ class Driver:
                             logger.debug('Had to use script')
                             err_logger.exception(e)
                             self.driver.execute_script("arguments[0].click();", i)
-                            return self.end_message(message, 'Broke it all for testing')
+                            # return self.end_message(message, 'Broke it all for testing')
                             # If element can't be clicked
                             # sent.append(name)
+                            # continue
+
+
+                            # Test to try to delete the element first
+                            # js = "var aa=document.getElementsByClassName('classname')[0];aa.parentNode.removeChild(aa)"
+                            # self.driver.execute_script(js)
                             # continue
                         
                         

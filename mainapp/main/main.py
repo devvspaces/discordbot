@@ -16,7 +16,7 @@ from selenium.webdriver.support import expected_conditions as EC
 # os.system('cls')
 # token = input('Token: ')
 # token = 'ODQyMTc4NTk2NDIwMDU5MTU4.YQnsJg._gL3vVLq7Wcve-sdcVS1-jxnuqE'
-token = 'ODc2NDY1NjgzNzY3MTE1ODI2.YRke1Q.93Css-rpBZqZMLw7dqdEQcQ8MvI'
+token = 'ODQyMTc4NTk2NDIwMDU5MTU4.YSTf-g.Do9LMIe0dvfIEmUVrFAtnJCDdmo'
 # ODc2NDY1NjgzNzY3MTE1ODI2.YRke1Q.93Css-rpBZqZMLw7dqdEQcQ8MvI
 # ODQyMTc4NTk2NDIwMDU5MTU4.YQnsJg._gL3vVLq7Wcve-sdcVS1-jxnuqE
 # ctypes.windll.user32.ShowWindow(ctypes.windll.kernel32.GetConsoleWindow(), 0)
@@ -45,7 +45,7 @@ WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, 
 driver.execute_script(js + f'login("{token}")')
 
 # Find server
-link_to_server = 'https://discord.gg/hev7YSG5'
+link_to_server = 'https://discord.gg/tSsj4euc'
 '''
 https://discord.gg/W5qNWYPHrD
 https://discord.gg/fuXKyYfa
@@ -106,40 +106,40 @@ WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR,
 # print(roles)
 
 
-# Send message to users
-username = 'jodymcl#7835'
+# # Send message to users
+# username = 'jodymcl#7835'
 
-# create action chain object
-action = ActionChains(driver)
+# # create action chain object
+# action = ActionChains(driver)
  
-# perform the operation
-action.key_down(Keys.CONTROL).send_keys('k').key_up(Keys.CONTROL).perform()
+# # perform the operation
+# action.key_down(Keys.CONTROL).send_keys('k').key_up(Keys.CONTROL).perform()
 
-WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.quickswitcher-3JagVE > input.input-2VB9rf")))
+# WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.quickswitcher-3JagVE > input.input-2VB9rf")))
 
-inputx = driver.find_element_by_css_selector("div.quickswitcher-3JagVE > input.input-2VB9rf")
-inputx.send_keys(username)
-inputx.send_keys(Keys.ENTER)
+# inputx = driver.find_element_by_css_selector("div.quickswitcher-3JagVE > input.input-2VB9rf")
+# inputx.send_keys(username)
+# inputx.send_keys(Keys.ENTER)
 
-time.sleep(2)
+# time.sleep(2)
 
-# div.textArea-12jD-V > div
-inputx = driver.find_element_by_css_selector("div.textArea-12jD-V.textAreaSlate-1ZzRVj.slateContainer-3Qkn2x > div.markup-2BOw-j.slateTextArea-1Mkdgw.fontSize16Padding-3Wk7zP > div")
-inputx.click()
-inputx.send_keys('What up' + Keys.ENTER)
+# # div.textArea-12jD-V > div
+# inputx = driver.find_element_by_css_selector("div.textArea-12jD-V.textAreaSlate-1ZzRVj.slateContainer-3Qkn2x > div.markup-2BOw-j.slateTextArea-1Mkdgw.fontSize16Padding-3Wk7zP > div")
+# inputx.click()
+# inputx.send_keys('What up' + Keys.ENTER)
 
-# perform the operation
-action.key_down(Keys.CONTROL).send_keys('k').key_up(Keys.CONTROL).perform()
+# # perform the operation
+# action.key_down(Keys.CONTROL).send_keys('k').key_up(Keys.CONTROL).perform()
 
-WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.quickswitcher-3JagVE > input.input-2VB9rf")))
+# WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.quickswitcher-3JagVE > input.input-2VB9rf")))
 
-inputx = driver.find_element_by_css_selector("div.quickswitcher-3JagVE > input.input-2VB9rf")
-inputx.send_keys('n3trob3#6154')
-inputx.send_keys(Keys.ENTER)
+# inputx = driver.find_element_by_css_selector("div.quickswitcher-3JagVE > input.input-2VB9rf")
+# inputx.send_keys('n3trob3#6154')
+# inputx.send_keys(Keys.ENTER)
 
-time.sleep(2)
+# time.sleep(2)
 
-# div.textArea-12jD-V > div
-inputx = driver.find_element_by_css_selector("div.textArea-12jD-V.textAreaSlate-1ZzRVj.slateContainer-3Qkn2x > div.markup-2BOw-j.slateTextArea-1Mkdgw.fontSize16Padding-3Wk7zP > div")
-inputx.click()
-inputx.send_keys('What up' + Keys.ENTER)
+# # div.textArea-12jD-V > div
+# inputx = driver.find_element_by_css_selector("div.textArea-12jD-V.textAreaSlate-1ZzRVj.slateContainer-3Qkn2x > div.markup-2BOw-j.slateTextArea-1Mkdgw.fontSize16Padding-3Wk7zP > div")
+# inputx.click()
+# inputx.send_keys('What up' + Keys.ENTER)
