@@ -513,7 +513,7 @@ function start(e) {
     let validation_message = []
 
     if (direct_message == ''){
-        validation_message.push('You can send an empty message')
+        validation_message.push('You can\'t send an empty message')
         valid = false
     }
 

@@ -55,10 +55,10 @@ class Driver:
         chrome_options.add_experimental_option("prefs", prefs)
         chrome_options.add_argument("--disable-infobars")
         chrome_options.add_argument("--disable-extensions")
-        chrome_options.add_argument('--disable-gpu')
+        # chrome_options.add_argument('--disable-gpu')
 
-        chrome_options.add_argument("--headless")
-        driver = webdriver.Chrome("C:/Users/HP6460B/discordauto/mainapp/main/chromedriver.exe", options=chrome_options)
+        # chrome_options.add_argument("--headless")
+        driver = webdriver.Chrome("C:/Users/User/discordbot/mainapp/main/chromedriver.exe", options=chrome_options)
 
         self.driver = driver
 
@@ -182,8 +182,6 @@ class Driver:
                 self.working = False
                 return f'The discord server invite may be expired, invalid, or we do not have permission to join.'
             
-            print('Makeeeee')
-
             server_icon, server_name, members, _ = self.get_server_detail_els()
 
             # Check if the server already exists
@@ -234,6 +232,14 @@ class Driver:
                     # Wait for the time
                     time.sleep(wait_time)
                     logger.debug(f'Waited {wait_time}')
+
+                # except StaleElementReferenceException:
+                #     logger.debug('Elements went stale here')
+                    
+                #     self.driver.refresh()
+
+                #     wait = WebDriverWait(self.driver, 200)
+                #     wait.until(EC.invisibility_of_element_located((By.CSS_SELECTOR, ".ready-36e6Vk"))) 
 
         return el
     
@@ -294,7 +300,7 @@ class Driver:
             if not self.is_authenticated:
                 response = self.login_account()
                 if not response:
-                    return self.end_message(message, 'Error connecting to discord server. Support teams have been alerted, try again later', mtype='completed_message')
+                    return self.end_message(message, 'Error connecting to discord server. Support teams have been alerted, try again later')
             
 
             # Go to the discord link
@@ -347,6 +353,10 @@ class Driver:
             real_names = []
             created = []
 
+            server_rel_link = self.driver.current_url
+
+            logger.debug(f'Discord server real link is {server_rel_link}')
+
 
             # Start the looping to send messages to any found users
             completed = True
@@ -362,12 +372,19 @@ class Driver:
                     logger.debug('Loop was broken by stop_messaging')
                     break
 
-                # Check to see if messages have been sent to all members or continue
-                if members is None:
-                    members = [i for i in self.driver.find_elements_by_css_selector('div.member-3-YXUe') if i.text.find('BOT')==-1]
-                    if len(members) <= len(sent):
-                        logger.debug('Members on page are less than members already sent to')
-                        break
+                try:
+
+                    # Check to see if messages have been sent to all members or continue
+                    if members is None:
+                        members_list = self.find_webelement(wait_time = 1, count = 40, find_function=self.driver.find_elements_by_css_selector, selector='div.member-3-YXUe', is_list=True)
+                        members = [i for i in members_list if i.text.find('BOT')==-1]
+                        if len(members) <= len(sent):
+                            logger.debug('Members on page are less than members already sent to')
+                            break
+
+                except StaleElementReferenceException:
+                    logger.debug('Members went stale during processing')
+                    members = []
 
                 logger.debug(f'Scraped members {len(members)}')
                 logger.debug(f'Scraped users {len(sent)}')
@@ -393,7 +410,10 @@ class Driver:
                         item = self.find_webelement(wait_time=1, count=20, find_function=i.find_element_by_css_selector, selector='div.nameAndDecorators-5FJ2dg')
                         if item:
                             name = item.text
-                            logger.debug(f'Got a name --> {name}')
+
+                            # Covert name to acceptable utf 8 name that is loggable
+                            namex = name.encode().decode("utf-8", "ignore")
+                            logger.debug(f'Got a name --> {namex}')
                         else:
                             continue
                     except StaleElementReferenceException:
@@ -401,6 +421,7 @@ class Driver:
                         logger.debug('Members became stale, restarting loop')
                         members = None
                         break
+
                     # End of getting general username ================
 
                     # Test if name is available, if user hasn't been processed before and if user is not a BOT
@@ -411,13 +432,9 @@ class Driver:
                         except ElementClickInterceptedException:
                             logger.debug('Had to use script')
                             self.driver.execute_script("arguments[0].click();", i)
-                        
-                        
-                        # Find the text element ============
-                        # layer = self.find_webelement(wait_time=1, count=20, find_function=self.driver.find_element_by_css_selector, selector='.layer-v9HyYc')
-                        # logger.debug(f'\n\n{layer.get_attribute("innerHTML")}\n\n')
-                        # return self.end_message(message, 'Broke it all for testing')
 
+
+                        # Getting the real name and sending messages
                         real_name = self.find_webelement(wait_time=1, count=20, find_function=self.driver.find_element_by_css_selector, selector='div.nameTag-m8r81H')
                         if real_name is not None:
                             name_data = real_name.text
@@ -461,8 +478,12 @@ class Driver:
                                 continue
 
 
-                            inputElement.send_keys(message_text)
-                            inputElement.send_keys(Keys.ENTER)
+                            try:
+                                inputElement.send_keys(message_text)
+                                inputElement.send_keys(Keys.ENTER)
+                            except Exception as e:
+                                err_logger.exception(e)
+                                continue
                             
 
                             # Wait for the message to send ===========
@@ -499,8 +520,17 @@ class Driver:
                                 logger.debug('No messages was found here')
 
                             self.driver.back()
+                            time.sleep(1)
+
+                            # self.driver.get(server_rel_link)
+
+                            # wait = WebDriverWait(self.driver, 200)
+                            # wait.until(EC.invisibility_of_element_located((By.CSS_SELECTOR, ".ready-36e6Vk"))) 
                             # End of sending message to user ==========
 
+                            # logger.debug('Got to the break')
+                            # members = None
+                            # break
 
                 else:
                     logger.debug('Finished a loop or members')

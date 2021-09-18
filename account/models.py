@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from .managers import DiscordAccountManager, ProxyPortManager
+from .utils import unique_name
 
 
 class UserManager(BaseUserManager):
@@ -125,18 +126,19 @@ class ProxyPort(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    discord_username = models.CharField(max_length=200, blank=True)
+    discord_username = models.CharField(max_length=200, unique=True)
     created = models.DateTimeField(auto_now_add=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
     def __str__(self):
         return str(self.uid)
 
-    # def get_absolute_url(self):
-    #     return reverse('profile', args=[self.first_name])
-
 
 @receiver(post_save, sender=User)
 def create_profile(sender, instance, created, **kwargs):
-    profile = Profile.objects.get_or_create(user=instance)
+    profile, created = Profile.objects.get_or_create(user=instance)
     # Generate random username
+
+    unique_username = unique_name(profile)
+    profile.discord_username = unique_username
+    profile.save()
