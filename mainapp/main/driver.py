@@ -6,9 +6,10 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, ElementClickInterceptedException, WebDriverException
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, ElementClickInterceptedException, WebDriverException, TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -55,10 +56,10 @@ class Driver:
         chrome_options.add_experimental_option("prefs", prefs)
         chrome_options.add_argument("--disable-infobars")
         chrome_options.add_argument("--disable-extensions")
-        chrome_options.add_argument('--disable-gpu')
+        # chrome_options.add_argument('--disable-gpu')
 
-        chrome_options.add_argument("--headless")
-        driver = webdriver.Chrome("C:/Users/HP6460B/discordauto/mainapp/main/chromedriver.exe", options=chrome_options)
+        # chrome_options.add_argument("--headless")
+        driver = webdriver.Chrome("C:/Users/User/discordbot/mainapp/main/chromedriver.exe", options=chrome_options)
 
         self.driver = driver
 
@@ -182,8 +183,6 @@ class Driver:
                 self.working = False
                 return f'The discord server invite may be expired, invalid, or we do not have permission to join.'
             
-            print('Makeeeee')
-
             server_icon, server_name, members, _ = self.get_server_detail_els()
 
             # Check if the server already exists
@@ -235,6 +234,14 @@ class Driver:
                     time.sleep(wait_time)
                     logger.debug(f'Waited {wait_time}')
 
+                # except StaleElementReferenceException:
+                #     logger.debug('Elements went stale here')
+                    
+                #     self.driver.refresh()
+
+                #     wait = WebDriverWait(self.driver, 200)
+                #     wait.until(EC.invisibility_of_element_located((By.CSS_SELECTOR, ".ready-36e6Vk"))) 
+
         return el
     
 
@@ -253,9 +260,9 @@ class Driver:
             err_logger.exception(e)
 
     
-    def stop_messaging(self, event, message, messages_left):
+    def stop_messaging(self, message, messages_left):
         # If event is set stop sending messages
-        if event.isSet():
+        if message.isSet():
             logger.debug('Stop message event was set')
             return True
             
@@ -271,7 +278,22 @@ class Driver:
             logger.debug('Message stopped because user has no more messages left')
             return True
 
-    
+    def get_members(self):
+        return self.find_webelement(wait_time = 1, count = 40, find_function=self.driver.find_elements_by_css_selector, selector='div.member-3-YXUe', is_list=True)
+
+    def get_members_names(self, members=None, count=0):
+        if count < 15:
+            try:
+                if not members:
+                    members = self.get_members()
+                return [i for i in members if i.text.find('BOT')==-1]
+            except StaleElementReferenceException:
+                count += 1
+                logger.debug('Members went stale during processing')
+                return self.get_members_names(count=count)
+        else:
+            raise StaleElementReferenceException
+
     def send_message(self, message, event):
         self.working = True
 
@@ -294,7 +316,7 @@ class Driver:
             if not self.is_authenticated:
                 response = self.login_account()
                 if not response:
-                    return self.end_message(message, 'Error connecting to discord server. Support teams have been alerted, try again later', mtype='completed_message')
+                    return self.end_message(message, 'Error connecting to discord server. Support teams have been alerted, try again later')
             
 
             # Go to the discord link
@@ -322,7 +344,7 @@ class Driver:
 
 
             # Get the members on the discord page
-            members = self.find_webelement(wait_time = 1, count = 40, find_function=self.driver.find_elements_by_css_selector, selector='div.member-3-YXUe', is_list=True)
+            members = self.get_members()
             
             # If no members where found
             if (members is None) or (len(members) == 0):
@@ -344,9 +366,17 @@ class Driver:
 
             # Set the containers to store names found and names of users that have received messages
             sent = []
+            usernames = []
             real_names = []
             created = []
 
+            server_rel_link = self.driver.current_url
+
+            logger.debug(f'Discord server real link is {server_rel_link}')
+
+            # Set page scrolling counter and count
+            scroll_by = 5000
+            scroll_count = 1
 
             # Start the looping to send messages to any found users
             completed = True
@@ -354,76 +384,90 @@ class Driver:
 
                 logger.debug('Started while loop')
 
+                message.refresh_from_db()
+
                 # Get the messages left for the user
                 messages_left = Order.objects.filter(profile=message.profile).count_dm() - DirectMessage.objects.filter(profile=message.profile).count_sent()
 
                 # Check to see if we are to stop messaging
-                if self.stop_messaging(event, message, messages_left):
+                if self.stop_messaging(message, messages_left):
                     logger.debug('Loop was broken by stop_messaging')
                     break
 
-                # Check to see if messages have been sent to all members or continue
-                if members is None:
-                    members = [i for i in self.driver.find_elements_by_css_selector('div.member-3-YXUe') if i.text.find('BOT')==-1]
-                    if len(members) <= len(sent):
-                        logger.debug('Members on page are less than members already sent to')
-                        break
+                # Get the names found
+                usernames.append(self.get_members_names(members=members))
+                usernames = list(set(usernames))
+                members = None
 
-                logger.debug(f'Scraped members {len(members)}')
-                logger.debug(f'Scraped users {len(sent)}')
+                # Get the names that hasn't been sent messages
+                unique = set(sent).symmetric_difference(set(usernames))
 
-
-                # Loop through all found members
-                for i in members:
-                    
-                    # Making checks before trying to find users ====
-
-                    # Check to see if we are to stop messaging
-                    if self.stop_messaging(event, message, messages_left):
-                        completed = False
-                        logger.debug('For Loop was broken completely by stop_messaging')
-                        break
-
-                    # Checking ends =================================
+                logger.debug(f'Usernames {len(usernames)}')
+                logger.debug(f'Sent {len(sent)}')
+                logger.debug(f'Unique names {len(unique)}')
 
 
+                if len(unique) == 0:
+                    completed = False
+                else:
+                    # Loop through all unique names
+                    for username in unique:
 
-                    # Getting the general username
-                    try:
-                        item = self.find_webelement(wait_time=1, count=20, find_function=i.find_element_by_css_selector, selector='div.nameAndDecorators-5FJ2dg')
-                        if item:
-                            name = item.text
-                            logger.debug(f'Got a name --> {name}')
-                        else:
-                            continue
-                    except StaleElementReferenceException:
-                        # If webelements session have expired, set members to none to rescrape
-                        logger.debug('Members became stale, restarting loop')
-                        members = None
-                        break
-                    # End of getting general username ================
+                        message.refresh_from_db()
+                        
+                        # Check to see if we are to stop messaging
+                        if self.stop_messaging(message, messages_left):
+                            completed = False
+                            logger.debug('For Loop was broken completely by stop_messaging')
+                            break
+                        # Checking ends =================================
 
-                    # Test if name is available, if user hasn't been processed before and if user is not a BOT
-                    if name and (name not in sent) and (name.find('BOT')==-1):
-                        # Click the member to send a message and get details
+
+                        # Find the user with quick search
+                        # create action chain object
+                        action = ActionChains(self.driver)
+                         
+                        # perform the operation
+                        action.key_down(Keys.CONTROL).send_keys('k').key_up(Keys.CONTROL).perform()
+
                         try:
-                            i.click()
-                        except ElementClickInterceptedException:
-                            logger.debug('Had to use script')
-                            self.driver.execute_script("arguments[0].click();", i)
-                        
-                        
-                        # Find the text element ============
-                        # layer = self.find_webelement(wait_time=1, count=20, find_function=self.driver.find_element_by_css_selector, selector='.layer-v9HyYc')
-                        # logger.debug(f'\n\n{layer.get_attribute("innerHTML")}\n\n')
-                        # return self.end_message(message, 'Broke it all for testing')
+                            WebDriverWait(self.driver, 15).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.quickswitcher-3JagVE > input.input-2VB9rf")))
 
-                        real_name = self.find_webelement(wait_time=1, count=20, find_function=self.driver.find_element_by_css_selector, selector='div.nameTag-m8r81H')
-                        if real_name is not None:
-                            name_data = real_name.text
+                            inputx = self.driver.find_element_by_css_selector("div.quickswitcher-3JagVE > input.input-2VB9rf")
+                            inputx.send_keys(username)
+                            inputx.send_keys(Keys.ENTER)
 
-                            logger.debug(f'Found a new name {name_data}')
+                            wait = WebDriverWait(self.driver, 10)
+                            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".cursorPointer-1j7DL8"))) 
+
+                            # Sending messages
+                            inputx = self.driver.find_element_by_css_selector("div.textArea-12jD-V.textAreaSlate-1ZzRVj.slateContainer-3Qkn2x > div.markup-2BOw-j.slateTextArea-1Mkdgw.fontSize16Padding-3Wk7zP > div")
+                            inputx.click()
+                            inputx.send_keys(message_text + Keys.ENTER)
+
+                            # Add user to the sent list
+                            logger.debug('Message sent to ' + name_data)
+                            sent.append(name)
                             
+                            # Update the message sent
+                            message.sent = message.sent + 1
+                            message.save()
+
+                            # Send message through websocket to update user
+                            send_channel_message(user_name, message='', mtype='message_update', count = 1)
+
+                            # Getting the real name
+                            btn_cursor = self.driver.find_element_by_css_selector('.cursorPointer-1j7DL8')
+                            btn_cursor.click()
+
+                            wait = WebDriverWait(self.driver, 1)
+                            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".nameTag-m8r81H")))
+
+                            # Get the real user identifier and save
+                            name_code = self.driver.find_element_by_css_selector('.nameTag-m8r81H').text
+                            name_data = real_name.text
+                            
+                            # Create new name
                             if name_data not in created:
                                 # Save or get the new user as a member
                                 user_mem, _ = Member.objects.get_or_create(username=name_data, discord_server=discord)
@@ -431,90 +475,61 @@ class Driver:
                             
                                 # Get user image
                                 try:
-                                    image = self.driver.find_element_by_css_selector('div.avatar-37jOim > svg > foreignObject > div > img')
+                                    image = self.driver.find_element_by_css_selector('.avatarStack-2Dr8S9 img')
                                     image = image.get_attribute("src")
                                     user_mem.image = image
-                                except NoSuchElementException as e:
-                                    pass
-                                
-                                # Get Roles
-                                try:
-                                    roles = self.driver.find_elements_by_css_selector('div.role-2irmRk > div.roleName-32vpEy')
-                                    role_text = ', '.join([i.text for i in roles])
-                                    user_mem.roles = role_text
                                 except NoSuchElementException as e:
                                     pass
                                 
                                 user_mem.save()
                                 logger.debug(f'Created or got a new name {name_data}')
                             
-
-                            # Sending a message to this user ===========
-                            
-                            # Find message box
-                            try:
-                                inputElement = self.driver.find_element_by_css_selector('div.footer-3UKYOU > div > input')
-                            except NoSuchElementException as e:
-                                # If the input box wasn't found add the user to sent and continue
-                                sent.append(name)
-                                real_names.append(name_data)
-                                continue
+                            # If blacklist users option is selected
+                            if message.blacklist_users:
+                                # Delete user from server members and add to selected blacklist
+                                member = discord.member_set.get(username = name_data)
+                                member.delete()
+                                blacklist.blacklist_set.create(username=member.username)
 
 
-                            inputElement.send_keys(message_text)
-                            inputElement.send_keys(Keys.ENTER)
-                            
+                            # Wait for the time delay
+                            delay = message.delay
+                            # **********Remove this when in production 3@3
+                            delay = 1
+                            # ****************************************
+                            time.sleep(delay)
 
-                            # Wait for the message to send ===========
-                            messages = self.find_webelement(wait_time=1, count=20, find_function=self.driver.find_elements_by_css_selector, selector='.messageContent-2qWWxC', is_list=True)
+                        except TimeoutException as e:
+                            logger.info('Timeout exception gotten')
+                            err_logger.exception(e)
+                            continue
+                    
+                    # Visit main page and scroll down
+                    self.driver.get(server_rel_link)
 
-                            if messages:
-                                # Add user to the sent list
-                                logger.debug('Message sent to ' + name_data)
-                                sent.append(name)
-                                real_names.append(name_data)
-                                
-                                # Update the message sent
-                                message.sent = message.sent + 1
-                                message.save()
+                    try:
+                        # Wait for page to load
+                        wait = WebDriverWait(self.driver, 200)
+                        wait.until(EC.invisibility_of_element_located((By.CSS_SELECTOR, ".ready-36e6Vk"))) 
 
-                                # Send message through websocket to update user
-                                send_channel_message(user_name, message='', mtype='message_update', count = 1)
-
-                                # If blacklist users option is selected
-                                if message.blacklist_users:
-                                    # Delete user from server members and add to selected blacklist
-                                    member = discord.member_set.get(username = name_data)
-                                    member.delete()
-                                    blacklist.blacklist_set.create(username=member.username)
-
-
-                                # Wait for the time delay
-                                delay = message.delay
-                                # **********Remove this when in production 3@3
-                                delay = 1
-                                # ****************************************
-                                time.sleep(delay)
-                            else:
-                                logger.debug('No messages was found here')
-
-                            self.driver.back()
-                            # End of sending message to user ==========
+                        # Get members
+                        members = self.get_members()
+                        
+                        self.driver.execute_script(f"document.querySelector('.members-1998pB.thin-1ybCId.scrollerBase-289Jih').scrollTop = {scroll_by * scroll_count}") 
+                        scroll_count += 1
+                    except TimeoutException as e:
+                        logger.info('Timeout exception gotten')
+                        err_logger.exception(e)
 
 
-                else:
-                    logger.debug('Finished a loop or members')
-                    members = None
-            
-            logger.debug(f'Sent messages to {len(set(sent))} members and Created {len(set(created))} members')
-
+            logger.debug(f'Sent messages to {len(sent)} members')
             
             # Update message model and Send completed message to websocket that it is completed
             return self.end_message(message, 'Completed sending messages')
 
         except Exception as e:
             err_logger.exception(e)
-            return self.end_message(message,'Completed sending messages')
+            return self.end_message(message,'Stopped sending messages')
 
         return True
 

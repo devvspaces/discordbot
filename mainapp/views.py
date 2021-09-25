@@ -509,8 +509,6 @@ class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
                     'message': 'Started sending message'
                     }, status=200)
 
-                
-           
             elif blacklist_uid:
                 # Verify the blacklist_uid
                 try:
@@ -549,13 +547,7 @@ class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
                 except DirectMessage.DoesNotExist:
                     return self.json_err_response('Error processing your request')
                 
-                event_obj = events_dict.get(message.uid, None)
-                
-                if event_obj:
-                    event_obj.set()
-
-                message.completed = True
-                message.save()
+                message.setStop()
                 
                 return JsonResponse({
                     'data': 'success',
