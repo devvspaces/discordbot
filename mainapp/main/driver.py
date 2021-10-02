@@ -125,11 +125,39 @@ class Driver:
 
         # First check if the invite is already expired
         invalid_title = self.find_webelement(wait_time = 1, count = 20, find_function=self.driver.find_element_by_css_selector, selector="h3.title-jXR8lp")
-        if invalid_title is not None:
-            if invalid_title.text.lower() in [i.lower() for i in invalid_titles]:
-                invalid = True
+        
+        try:
+            if invalid_title is not None:
+                if invalid_title.text.lower() in [i.lower() for i in invalid_titles]:
+                    invalid = True
+        except StaleElementReferenceException:
+            return self.check_invite()
         
         return invalid
+
+
+    def check_app_redirect(self):
+        # To check if the invite is expired
+        check = False
+
+        logger.debug('Got here')
+
+        # Invalid titles
+        invalid_titles = ['Discord App Launched']
+
+        # First check if the invite is already expired
+        invalid_title = self.find_webelement(wait_time = 1, count = 5, find_function=self.driver.find_element_by_css_selector, selector="h3.title-jXR8lp")
+        
+        try:
+            if invalid_title is not None:
+                logger.debug(f'Checked for redirect: {invalid_title.text.lower()}')
+                if invalid_title.text.lower() in [i.lower() for i in invalid_titles]:
+                    check = True
+        except StaleElementReferenceException:
+            logger.debug('Went stale while checking for redirect')
+            return self.check_app_redirect()
+        
+        return check
 
 
     def get_server_detail_els(self):
@@ -278,21 +306,51 @@ class Driver:
             logger.debug('Message stopped because user has no more messages left')
             return True
 
+
     def get_members(self):
         return self.find_webelement(wait_time = 1, count = 40, find_function=self.driver.find_elements_by_css_selector, selector='div.member-3-YXUe', is_list=True)
 
+
     def get_members_names(self, members=None, count=0):
+        logger.debug(f'Counted {count}')
         if count < 15:
             try:
                 if not members:
                     members = self.get_members()
-                return [i for i in members if i.text.find('BOT')==-1]
+                return [i.text for i in members if i.text.find('BOT')==-1]
             except StaleElementReferenceException:
                 count += 1
                 logger.debug('Members went stale during processing')
                 return self.get_members_names(count=count)
         else:
+            logger.debug(f'Could not get any member at all')
             raise StaleElementReferenceException
+
+
+    def close_element_modal(self, class_names=None, id_names=None):
+
+        # If argument is none create a list
+        if class_names is None:
+            class_names = []
+
+        # If argument is none create a list
+        if id_names is None:
+            id_names = []
+
+        if class_names:
+            # Loop through class names and try to click the element to remove it
+            for i in class_names:
+                try:
+                    el = self.driver.find_element_by_css_selector(i)
+                    self.driver.execute_script("arguments[0].click();", el)
+                except NoSuchElementException:
+                    pass
+
+        elif id_names:
+            pass
+
+        return
+
 
     def send_message(self, message, event):
         self.working = True
@@ -342,6 +400,12 @@ class Driver:
             # Click to go to discord server page
             server_connect.click()
 
+            # if there is another occurence where by discord tries to redirect to app
+            if self.check_app_redirect():
+                server_connect = self.find_webelement(wait_time = 1, count = 1, find_function=self.driver.find_element_by_css_selector, selector="button[type='button']")
+                if server_connect:
+                    server_connect.click()
+
 
             # Get the members on the discord page
             members = self.get_members()
@@ -360,7 +424,7 @@ class Driver:
                         logger.debug(f'Updated expired token, account_id: {self.account_id}')
 
                     return self.end_message(message,'Sorry we can not connect to any server right now, try again later')
-                
+
                 return self.end_message(message,'Returned none to view because no members was found')
             
 
@@ -395,7 +459,7 @@ class Driver:
                     break
 
                 # Get the names found
-                usernames.append(self.get_members_names(members=members))
+                usernames += self.get_members_names(members=members)
                 usernames = list(set(usernames))
                 members = None
 
@@ -442,12 +506,24 @@ class Driver:
 
                             # Sending messages
                             inputx = self.driver.find_element_by_css_selector("div.textArea-12jD-V.textAreaSlate-1ZzRVj.slateContainer-3Qkn2x > div.markup-2BOw-j.slateTextArea-1Mkdgw.fontSize16Padding-3Wk7zP > div")
-                            inputx.click()
+                            
+                            try:
+                                inputx.click()
+                            except ElementClickInterceptedException as e:
+                                err_logger.exception(e)
+                                
+                                # Try to close some possible interacting elements
+                                self.close_element_modal(class_names=['.backdrop-1wrmKB'])
+
+                                # Try click input again
+                                logger.debug('Trying to click input element again')
+                                inputx.click()
+
                             inputx.send_keys(message_text + Keys.ENTER)
 
                             # Add user to the sent list
-                            logger.debug('Message sent to ' + name_data)
-                            sent.append(name)
+                            logger.debug('Message sent to ' + username)
+                            sent.append(username)
                             
                             # Update the message sent
                             message.sent = message.sent + 1
@@ -532,6 +608,7 @@ class Driver:
             return self.end_message(message,'Stopped sending messages')
 
         return True
+
 
     def quit(self):
         try:
