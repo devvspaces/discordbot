@@ -570,66 +570,15 @@ class Driver:
                         # Checking ends =================================
 
 
-<<<<<<< HEAD
-                    # Getting the general username
-                    try:
-                        logger.debug('Trying to find a name again')
-                        item = self.find_webelement(wait_time=1, count=20, find_function=i.find_element_by_css_selector, selector='div.nameAndDecorators-5FJ2dg')
-                        if item:
-                            name = item.text
-                            logger.debug(f'Got a name --> {name}')
-                        else:
-                            logger.debug('Continued to the next one')
-                            continue
-                    except StaleElementReferenceException:
-                        # If webelements session have expired, set members to none to rescrape
-                        logger.debug('Members became stale, restarting loop')
-                        members = None
-                        break
-                    # End of getting general username ================
-=======
                         # Find the user with quick search
                         # create action chain object
                         action = ActionChains(self.driver)
                          
                         # perform the operation
                         action.key_down(Keys.CONTROL).send_keys('k').key_up(Keys.CONTROL).perform()
->>>>>>> localsend
 
                         try:
-<<<<<<< HEAD
-                            i.click()
-                        except ElementClickInterceptedException as e:
-                            logger.debug(f'Before --> The window size: {self.driver.get_window_size()}')
-                            logger.debug('Had to use script')
-
-                            err_logger.exception(e)
-
-                            # self.driver.execute_script("arguments[0].click();", i)
-                            # self.driver.maximize_window()
-                            # self.driver.set_window_size(1920, 1080)
-
-                            # logger.debug(f'After --> The window size: {self.driver.get_window_size()}')
-                            # return self.end_message(message, 'Broke it all for testing')
-                            # If element can't be clicked
-                            # sent.append(name)
-                            # continue
-
-
-                            # Test to try to delete the element first
-                            js = "var aa=document.querySelector('.backdrop-1wrmKB');aa.remove()"
-                            self.driver.execute_script(js)
-                            continue
-                        
-                        
-                        # Find the text element ============
-                        # layers = self.find_webelement(wait_time=1, count=20, find_function=self.driver.find_elements_by_css_selector, selector='.layer-v9HyYc', is_list=True)
-                        # logger.debug(f'Found {len(layers)} divs')
-                        # for layer in layers:
-                        #     logger.debug(f'\n\n{layer.get_attribute("innerHTML")}\n\n')
-=======
                             WebDriverWait(self.driver, 15).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.quickswitcher-3JagVE > input.input-2VB9rf")))
->>>>>>> localsend
 
                             inputx = self.driver.find_element_by_css_selector("div.quickswitcher-3JagVE > input.input-2VB9rf")
                             
