@@ -6,7 +6,13 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, ElementClickInterceptedException, WebDriverException, TimeoutException
+from selenium.common.exceptions import (NoSuchElementException,
+    StaleElementReferenceException,
+    ElementClickInterceptedException,
+    WebDriverException,
+    TimeoutException,
+    ElementNotInteractableException
+)
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
@@ -72,6 +78,8 @@ class Driver:
         self.connected_to = None
 
         self.event = None
+
+        self.invalid_text = ['Unable to accept invite', 'Invite invalid']
         
         logger.debug('Created driver now')
 
@@ -120,21 +128,42 @@ class Driver:
         # To check if the invite is expired
         invalid = False
 
-        # Invalid titles
-        invalid_titles = ['Unable to accept invite', 'Invite invalid']
-
         # First check if the invite is already expired
-        invalid_title = self.find_webelement(wait_time = 1, count = 20, find_function=self.driver.find_element_by_css_selector, selector="h3.title-jXR8lp")
+        invalid_title = self.find_webelement(wait_time = 1, count = 5, find_function=self.driver.find_element_by_css_selector, selector="h3.title-jXR8lp")
         
         try:
             if invalid_title is not None:
-                if invalid_title.text.lower() in [i.lower() for i in invalid_titles]:
-                    invalid = True
+                for i in self.invalid_text:
+                    if invalid_title.text.lower() == i.lower():
+                        invalid = i
+
         except StaleElementReferenceException:
             return self.check_invite()
         
         return invalid
 
+    # def check_app_redirect(self):
+    #     # To check if the invite is expired
+    #     check = False
+
+    #     logger.debug('Got here')
+
+    #     # Invalid titles
+    #     invalid_titles = ['Discord App Launched']
+
+    #     # First check if the invite is already expired
+    #     invalid_title = self.find_webelement(wait_time = 1, count = 5, find_function=self.driver.find_element_by_css_selector, selector="h3.title-jXR8lp")
+        
+    #     try:
+    #         if invalid_title is not None:
+    #             logger.debug(f'Checked for redirect: {invalid_title.text.lower()}')
+    #             if invalid_title.text.lower() in [i.lower() for i in invalid_titles]:
+    #                 check = True
+    #     except StaleElementReferenceException:
+    #         logger.debug('Went stale while checking for redirect')
+    #         return self.check_app_redirect()
+        
+    #     return check
 
     def check_app_redirect(self):
         # To check if the invite is expired
@@ -142,17 +171,13 @@ class Driver:
 
         logger.debug('Got here')
 
-        # Invalid titles
-        invalid_titles = ['Discord App Launched']
-
-        # First check if the invite is already expired
-        invalid_title = self.find_webelement(wait_time = 1, count = 5, find_function=self.driver.find_element_by_css_selector, selector="h3.title-jXR8lp")
+        connect_btn = self.find_webelement(wait_time = 1, count = 5, find_function=self.driver.find_element_by_css_selector, selector=".button-3k0cO7")
         
         try:
-            if invalid_title is not None:
-                logger.debug(f'Checked for redirect: {invalid_title.text.lower()}')
-                if invalid_title.text.lower() in [i.lower() for i in invalid_titles]:
-                    check = True
+            if connect_btn is not None:
+                connect_btn.click()
+                check = True
+                logger.debug('Clicked the server button')
         except StaleElementReferenceException:
             logger.debug('Went stale while checking for redirect')
             return self.check_app_redirect()
@@ -317,7 +342,17 @@ class Driver:
             try:
                 if not members:
                     members = self.get_members()
-                return [i.text for i in members if i.text.find('BOT')==-1]
+
+                member_names = []
+                # Get the names
+                for i in members:
+                    if i.text.find('BOT')==-1:
+                        # Get the main username el
+                        username_el = i.find_element_by_css_selector('.name-uJV0GL')
+                        member_names.append(username_el.text)
+
+                return member_names
+
             except StaleElementReferenceException:
                 count += 1
                 logger.debug('Members went stale during processing')
@@ -351,6 +386,27 @@ class Driver:
 
         return
 
+    def quicksearch_input(self):
+        return self.driver.find_element_by_css_selector("div.quickswitcher-3JagVE > input.input-2VB9rf")
+
+    def try_to_send_message(self, message):
+
+        for i in range(3):
+            logger.debug(f'Trying to send message part {i}')
+
+            # Sending messages
+            input_box = self.driver.find_element_by_css_selector("div.textArea-12jD-V.textAreaSlate-1ZzRVj.slateContainer-3Qkn2x > div.markup-2BOw-j.slateTextArea-1Mkdgw.fontSize16Padding-3Wk7zP > div")
+            
+            try:
+                input_box.send_keys(message + Keys.ENTER)
+                return True
+            except StaleElementReferenceException as e:
+                # SKip this loop here
+                logger.debug('Got a StaleElementReferenceException when trying to send message')
+            except ElementNotInteractableException as e:
+                # SKip this loop here
+                logger.debug('Got a ElementNotInteractableException when trying to send message')
+
 
     def send_message(self, message, event):
         self.working = True
@@ -381,31 +437,29 @@ class Driver:
             self.driver.get(discord.link)
 
 
+            for i in range(3):
+                # Click the connect button if it is there
+                checked_result = self.check_app_redirect()
+                if checked_result == False:
+                    break
+
+
             # To check if the invite is expired
             invalid = self.check_invite()
 
-            if invalid == False:
-                # Find button and click
-                server_connect = self.find_webelement(wait_time = 1, count = 20, find_function=self.driver.find_element_by_css_selector, selector="button[type='button']")
-
-                # If the server_connect button was never found, this means the server link is invalid
-                if server_connect is None:
-                    invalid = True
-
             # If invalid is true return message
-            if invalid:
+            if invalid == self.invalid_text[1]:
                 return self.end_message(message, f'The discord server invite may be expired, invalid, or we do not have permission to join. Discor server: {discord.link}')
 
+            elif invalid == self.invalid_text[0]:
+                logger.debug('Token has expired')
+                if self.account_id:
+                    account = DiscordAccount.objects.get(id=self.account_id)
+                    account.expired_token = True
+                    account.save()
+                    logger.debug(f'Updated expired token, account_id: {self.account_id}')
 
-            # Click to go to discord server page
-            server_connect.click()
-
-            # if there is another occurence where by discord tries to redirect to app
-            if self.check_app_redirect():
-                server_connect = self.find_webelement(wait_time = 1, count = 1, find_function=self.driver.find_element_by_css_selector, selector="button[type='button']")
-                if server_connect:
-                    server_connect.click()
-
+                return self.end_message(message,'Sorry we can not connect to any server right now, try again later')
 
             # Get the members on the discord page
             members = self.get_members()
@@ -415,7 +469,7 @@ class Driver:
                 logger.debug('No members found')
                 
                 # Check if the discord account being used is expired
-                if self.check_invite():
+                if self.check_invite == self.invalid_text[0]:
                     logger.debug('Token has expired')
                     if self.account_id:
                         account = DiscordAccount.objects.get(id=self.account_id)
@@ -433,6 +487,14 @@ class Driver:
             usernames = []
             real_names = []
             created = []
+            quicksearched = []
+
+            # Get the blacklisted usernames in a list if a blacklist is selected
+            blacklisted = []
+            if blacklist is not None:
+                blacklist_set = blacklist.blacklist_set.all()
+                for i in blacklist_set:
+                    blacklisted.append(i.username)
 
             server_rel_link = self.driver.current_url
 
@@ -461,6 +523,14 @@ class Driver:
                 # Get the names found
                 usernames += self.get_members_names(members=members)
                 usernames = list(set(usernames))
+
+                # Remove the blacklisted usernames from the usernames list
+                if blacklisted:
+                    logger.debug(f'Blacklisted {len(usernames)}')
+                    for i in usernames:
+                        if i in blacklisted:
+                            usernames.remove(i)
+
                 members = None
 
                 # Get the names that hasn't been sent messages
@@ -469,7 +539,6 @@ class Driver:
                 logger.debug(f'Usernames {len(usernames)}')
                 logger.debug(f'Sent {len(sent)}')
                 logger.debug(f'Unique names {len(unique)}')
-
 
                 if len(unique) == 0:
                     completed = False
@@ -498,8 +567,33 @@ class Driver:
                             WebDriverWait(self.driver, 15).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.quickswitcher-3JagVE > input.input-2VB9rf")))
 
                             inputx = self.driver.find_element_by_css_selector("div.quickswitcher-3JagVE > input.input-2VB9rf")
-                            inputx.send_keys(username)
-                            inputx.send_keys(Keys.ENTER)
+                            
+                            logger.debug(f'Trying to send this username {username}')
+
+                            self.quicksearch_input().send_keys(username)
+
+                            logger.debug(f'Sent this username {username}')
+
+                            # Check if there were results in the quicksearch
+                            selector_xc3 = 'div.modal-3c3bKg div.scroller-zPkAnE div.contentDefault-16dKSY div.name-2NBmhj span.username-2hHyRL'
+                            names_results = self.driver.find_elements_by_css_selector(selector_xc3)
+
+                            if len(names_results) > 0:
+                                name_data = names_results[0].text
+                                logger.debug(f'A result was found and the real name is {name_data}')
+                                self.quicksearch_input().send_keys(Keys.ENTER)
+                            else:
+                                # No results
+                                # Check is username as been searched before
+                                if quicksearched.count(username) > 0:
+                                    # Add to blacklisted list to make sure we don't try sending to this user again
+                                    blacklisted.append(username)
+
+                                quicksearched.append(username)
+
+                                # Close quicksearch modal
+                                self.close_element_modal(class_names=['.backdrop-1wrmKB'])
+                                continue
 
                             wait = WebDriverWait(self.driver, 10)
                             wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".cursorPointer-1j7DL8"))) 
@@ -518,8 +612,19 @@ class Driver:
                                 # Try click input again
                                 logger.debug('Trying to click input element again')
                                 inputx.click()
+                            except StaleElementReferenceException as e:
+                                err_logger.exception(e)
 
-                            inputx.send_keys(message_text + Keys.ENTER)
+                                # SKip this loop here
+                                logger.debug('Skipped loop')
+                                continue
+
+                            # inputx.send_keys(message_text + Keys.ENTER)
+                            sent_message = self.try_to_send_message(message_text)
+
+                            if sent_message is None:
+                                logger.debug(f'Tried sending a message but did not work for {username}')
+                                continue
 
                             # Add user to the sent list
                             logger.debug('Message sent to ' + username)
@@ -531,17 +636,6 @@ class Driver:
 
                             # Send message through websocket to update user
                             send_channel_message(user_name, message='', mtype='message_update', count = 1)
-
-                            # Getting the real name
-                            btn_cursor = self.driver.find_element_by_css_selector('.cursorPointer-1j7DL8')
-                            btn_cursor.click()
-
-                            wait = WebDriverWait(self.driver, 1)
-                            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".nameTag-m8r81H")))
-
-                            # Get the real user identifier and save
-                            name_code = self.driver.find_element_by_css_selector('.nameTag-m8r81H').text
-                            name_data = real_name.text
                             
                             # Create new name
                             if name_data not in created:
@@ -559,6 +653,10 @@ class Driver:
                                 
                                 user_mem.save()
                                 logger.debug(f'Created or got a new name {name_data}')
+
+                            # Try to close some possible interacting elements
+                            # Possible element here is the profile modal box
+                            self.close_element_modal(class_names=['.backdrop-1wrmKB'])
                             
                             # If blacklist users option is selected
                             if message.blacklist_users:
@@ -571,12 +669,13 @@ class Driver:
                             # Wait for the time delay
                             delay = message.delay
                             # **********Remove this when in production 3@3
-                            delay = 1
+                            delay = 10
                             # ****************************************
+                            logger.debug(f'slept for {delay}')
                             time.sleep(delay)
 
-                        except TimeoutException as e:
-                            logger.info('Timeout exception gotten')
+                        except (WebDriverException, TimeoutException) as e:
+                            logger.info('Timeout or WebDriverException exception gotten')
                             err_logger.exception(e)
                             continue
                     
@@ -594,7 +693,7 @@ class Driver:
                         self.driver.execute_script(f"document.querySelector('.members-1998pB.thin-1ybCId.scrollerBase-289Jih').scrollTop = {scroll_by * scroll_count}") 
                         scroll_count += 1
                     except TimeoutException as e:
-                        logger.info('Timeout exception gotten')
+                        logger.info('Timeout exception gotten while going back to main server page')
                         err_logger.exception(e)
 
 

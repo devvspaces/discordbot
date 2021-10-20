@@ -512,6 +512,13 @@ function start(e) {
     let valid = true
     let validation_message = []
 
+    if (add_to_blacklist_checkbox === true){
+        if (blacklist_uid == ''){
+            validation_message.push('You have to select a blacklist where Repeat Users will be blacklisted.')
+            valid = false
+        }
+    }
+
     if (direct_message == ''){
         validation_message.push('You can send an empty message')
         valid = false
