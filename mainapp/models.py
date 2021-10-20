@@ -83,8 +83,17 @@ class DirectMessage(models.Model):
     sent = models.IntegerField(default=0)
     completed = models.BooleanField(default=False)
 
+    event_stop = models.BooleanField(default=False)
+
     objects = MessageManager()
 
+    def isSet(self):
+        return self.event_stop
+
+    def setStop(self):
+        self.event_stop = True
+        self.completed = True
+        self.save()
 
     # override save method to add server_name when model is saved
     def save(self, *args, **kwargs):

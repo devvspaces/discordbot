@@ -411,7 +411,7 @@ class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
                 try:
                     if blacklist_uid:
                         blacklist = BlacklistParent.objects.get(uid=blacklist_uid)
-                        if blacklist.count_list() == 0:
+                        if (blacklist.count_list() == 0) and (add_to_blacklist_checkbox != 'true'):
                             valid = False
                             validation_errors.append('Blacklist selected contains no username')
                 except BlacklistParent.DoesNotExist:
@@ -436,7 +436,7 @@ class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
                 try:
                     if int(delay) < 15:
                         raise ValueError
-                except  ValueError:
+                except ValueError:
                     valid = False
                     validation_errors.append('Your delay time must be greater than 15')
                 
@@ -492,7 +492,6 @@ class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
                 if driver_instance is None:
                     return self.json_err_response('There are not bots available now, try again later')
 
-
                 # Create an event for this
                 new_event = threading.Event()
 
@@ -509,8 +508,6 @@ class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
                     'message': 'Started sending message'
                     }, status=200)
 
-                
-           
             elif blacklist_uid:
                 # Verify the blacklist_uid
                 try:
@@ -549,13 +546,7 @@ class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
                 except DirectMessage.DoesNotExist:
                     return self.json_err_response('Error processing your request')
                 
-                event_obj = events_dict.get(message.uid, None)
-                
-                if event_obj:
-                    event_obj.set()
-
-                message.completed = True
-                message.save()
+                message.setStop()
                 
                 return JsonResponse({
                     'data': 'success',

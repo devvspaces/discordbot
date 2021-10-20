@@ -25,6 +25,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
+        logger.debug('Created chat Consumer')
+
         await self.accept()
 
     async def disconnect(self, *args, **kwargs):
@@ -33,6 +35,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
+
+        logger.debug('Disconnected chat Consumer')
 
     # Receive message from room group
     async def channel_message(self, event):

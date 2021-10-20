@@ -6,9 +6,16 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, ElementClickInterceptedException, WebDriverException
+from selenium.common.exceptions import (NoSuchElementException,
+    StaleElementReferenceException,
+    ElementClickInterceptedException,
+    WebDriverException,
+    TimeoutException,
+    ElementNotInteractableException
+)
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -53,13 +60,15 @@ class Driver:
         # Other driver settings
         prefs = {"profile.managed_default_content_settings.images": 2}
         chrome_options.add_experimental_option("prefs", prefs)
-        chrome_options.add_argument("disable-infobars")
+        
+        chrome_options.add_argument("--disable-infobars")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--start-maximized")
         chrome_options.add_argument("--headless")
         chrome_options.add_argument('--window-size=1920x1080')
         chrome_options.add_argument('--start-fullscreen')
+        chrome_options.add_argument("--disable-extensions")
         # chrome_options.add_argument("--disable-native-events")
 
         driver = webdriver.Chrome(options=chrome_options)
@@ -75,6 +84,8 @@ class Driver:
         self.connected_to = None
 
         self.event = None
+
+        self.invalid_text = ['Unable to accept invite', 'Invite invalid']
         
         logger.debug('Created driver now')
         # self.driver.set_window_size(1920, 1080)
@@ -125,16 +136,61 @@ class Driver:
         # To check if the invite is expired
         invalid = False
 
-        # Invalid titles
-        invalid_titles = ['Unable to accept invite', 'Invite invalid']
-
         # First check if the invite is already expired
-        invalid_title = self.find_webelement(wait_time = 1, count = 20, find_function=self.driver.find_element_by_css_selector, selector="h3.title-jXR8lp")
-        if invalid_title is not None:
-            if invalid_title.text.lower() in [i.lower() for i in invalid_titles]:
-                invalid = True
+        invalid_title = self.find_webelement(wait_time = 1, count = 5, find_function=self.driver.find_element_by_css_selector, selector="h3.title-jXR8lp")
+        
+        try:
+            if invalid_title is not None:
+                for i in self.invalid_text:
+                    if invalid_title.text.lower() == i.lower():
+                        invalid = i
+
+        except StaleElementReferenceException:
+            return self.check_invite()
         
         return invalid
+
+    # def check_app_redirect(self):
+    #     # To check if the invite is expired
+    #     check = False
+
+    #     logger.debug('Got here')
+
+    #     # Invalid titles
+    #     invalid_titles = ['Discord App Launched']
+
+    #     # First check if the invite is already expired
+    #     invalid_title = self.find_webelement(wait_time = 1, count = 5, find_function=self.driver.find_element_by_css_selector, selector="h3.title-jXR8lp")
+        
+    #     try:
+    #         if invalid_title is not None:
+    #             logger.debug(f'Checked for redirect: {invalid_title.text.lower()}')
+    #             if invalid_title.text.lower() in [i.lower() for i in invalid_titles]:
+    #                 check = True
+    #     except StaleElementReferenceException:
+    #         logger.debug('Went stale while checking for redirect')
+    #         return self.check_app_redirect()
+        
+    #     return check
+
+    def check_app_redirect(self):
+        # To check if the invite is expired
+        check = False
+
+        logger.debug('Got here')
+
+        connect_btn = self.find_webelement(wait_time = 1, count = 5, find_function=self.driver.find_element_by_css_selector, selector=".button-3k0cO7")
+        
+        try:
+            if connect_btn is not None:
+                connect_btn.click()
+                check = True
+                logger.debug('Clicked the server button')
+        except StaleElementReferenceException:
+            logger.debug('Went stale while checking for redirect')
+            return self.check_app_redirect()
+        
+        return check
 
 
     def get_server_detail_els(self):
@@ -188,8 +244,6 @@ class Driver:
                 self.working = False
                 return f'The discord server invite may be expired, invalid, or we do not have permission to join.'
             
-            print('Makeeeee')
-
             server_icon, server_name, members, _ = self.get_server_detail_els()
 
             # Check if the server already exists
@@ -243,6 +297,14 @@ class Driver:
                     time.sleep(wait_time)
                     logger.debug(f'Waited {wait_time}')
 
+                # except StaleElementReferenceException:
+                #     logger.debug('Elements went stale here')
+                    
+                #     self.driver.refresh()
+
+                #     wait = WebDriverWait(self.driver, 200)
+                #     wait.until(EC.invisibility_of_element_located((By.CSS_SELECTOR, ".ready-36e6Vk"))) 
+
         return el
     
 
@@ -261,9 +323,9 @@ class Driver:
             err_logger.exception(e)
 
     
-    def stop_messaging(self, event, message, messages_left):
+    def stop_messaging(self, message, messages_left):
         # If event is set stop sending messages
-        if event.isSet():
+        if message.isSet():
             logger.debug('Stop message event was set')
             return True
             
@@ -279,7 +341,83 @@ class Driver:
             logger.debug('Message stopped because user has no more messages left')
             return True
 
-    
+
+    def get_members(self):
+        return self.find_webelement(wait_time = 1, count = 40, find_function=self.driver.find_elements_by_css_selector, selector='div.member-3-YXUe', is_list=True)
+
+
+    def get_members_names(self, members=None, count=0):
+        logger.debug(f'Counted {count}')
+        if count < 15:
+            try:
+                if not members:
+                    members = self.get_members()
+
+                member_names = []
+                # Get the names
+                for i in members:
+                    if i.text.find('BOT')==-1:
+                        # Get the main username el
+                        username_el = i.find_element_by_css_selector('.name-uJV0GL')
+                        member_names.append(username_el.text)
+
+                return member_names
+
+            except StaleElementReferenceException:
+                count += 1
+                logger.debug('Members went stale during processing')
+                return self.get_members_names(count=count)
+        else:
+            logger.debug(f'Could not get any member at all')
+            raise StaleElementReferenceException
+
+
+    def close_element_modal(self, class_names=None, id_names=None):
+
+        # If argument is none create a list
+        if class_names is None:
+            class_names = []
+
+        # If argument is none create a list
+        if id_names is None:
+            id_names = []
+
+        if class_names:
+            # Loop through class names and try to click the element to remove it
+            for i in class_names:
+                try:
+                    el = self.driver.find_element_by_css_selector(i)
+                    self.driver.execute_script("arguments[0].click();", el)
+                except NoSuchElementException:
+                    pass
+
+        elif id_names:
+            pass
+
+        return
+
+    def quicksearch_input(self):
+        return self.driver.find_element_by_css_selector("div.quickswitcher-3JagVE > input.input-2VB9rf")
+
+    def try_to_send_message(self, message):
+
+        for i in range(3):
+            logger.debug(f'Trying to send message part {i}')
+
+            # Sending messages
+            input_box = self.driver.find_element_by_css_selector("div.textArea-12jD-V.textAreaSlate-1ZzRVj.slateContainer-3Qkn2x > div.markup-2BOw-j.slateTextArea-1Mkdgw.fontSize16Padding-3Wk7zP > div")
+            
+            try:
+                input_box.send_keys(message + Keys.ENTER)
+                return True
+            except StaleElementReferenceException as e:
+                # SKip this loop here
+                logger.debug('Got a StaleElementReferenceException when trying to send message')
+            except ElementNotInteractableException as e:
+                # SKip this loop here
+                logger.debug('Got a ElementNotInteractableException when trying to send message')
+
+
     def send_message(self, message, event):
         self.working = True
 
@@ -306,44 +444,46 @@ class Driver:
             if not self.is_authenticated:
                 response = self.login_account()
                 if not response:
-                    return self.end_message(message, 'Error connecting to discord server. Support teams have been alerted, try again later', mtype='completed_message')
+                    return self.end_message(message, 'Error connecting to discord server. Support teams have been alerted, try again later')
             
 
             # Go to the discord link
             self.driver.get(discord.link)
 
 
+            for i in range(3):
+                # Click the connect button if it is there
+                checked_result = self.check_app_redirect()
+                if checked_result == False:
+                    break
+
+
             # To check if the invite is expired
             invalid = self.check_invite()
 
-            if invalid == False:
-                # Find button and click
-                server_connect = self.find_webelement(wait_time = 1, count = 20, find_function=self.driver.find_element_by_css_selector, selector="button[type='button']")
-
-                # If the server_connect button was never found, this means the server link is invalid
-                if server_connect is None:
-                    invalid = True
-
             # If invalid is true return message
-            if invalid:
+            if invalid == self.invalid_text[1]:
                 return self.end_message(message, f'The discord server invite may be expired, invalid, or we do not have permission to join. Discor server: {discord.link}')
 
+            elif invalid == self.invalid_text[0]:
+                logger.debug('Token has expired')
+                if self.account_id:
+                    account = DiscordAccount.objects.get(id=self.account_id)
+                    account.expired_token = True
+                    account.save()
+                    logger.debug(f'Updated expired token, account_id: {self.account_id}')
 
-            # Click to go to discord server page
-            server_connect.click()
-
-            time.sleep(10)
-
+                return self.end_message(message,'Sorry we can not connect to any server right now, try again later')
 
             # Get the members on the discord page
-            members = self.find_webelement(wait_time = 1, count = 40, find_function=self.driver.find_elements_by_css_selector, selector='div.member-3-YXUe', is_list=True)
+            members = self.get_members()
             
             # If no members where found
             if (members is None) or (len(members) == 0):
                 logger.debug('No members found')
                 
                 # Check if the discord account being used is expired
-                if self.check_invite():
+                if self.check_invite == self.invalid_text[0]:
                     logger.debug('Token has expired')
                     if self.account_id:
                         account = DiscordAccount.objects.get(id=self.account_id)
@@ -352,15 +492,31 @@ class Driver:
                         logger.debug(f'Updated expired token, account_id: {self.account_id}')
 
                     return self.end_message(message,'Sorry we can not connect to any server right now, try again later')
-                
+
                 return self.end_message(message,'Returned none to view because no members was found')
             
 
             # Set the containers to store names found and names of users that have received messages
             sent = []
+            usernames = []
             real_names = []
             created = []
+            quicksearched = []
 
+            # Get the blacklisted usernames in a list if a blacklist is selected
+            blacklisted = []
+            if blacklist is not None:
+                blacklist_set = blacklist.blacklist_set.all()
+                for i in blacklist_set:
+                    blacklisted.append(i.username)
+
+            server_rel_link = self.driver.current_url
+
+            logger.debug(f'Discord server real link is {server_rel_link}')
+
+            # Set page scrolling counter and count
+            scroll_by = 5000
+            scroll_count = 1
 
             # Start the looping to send messages to any found users
             completed = True
@@ -368,40 +524,53 @@ class Driver:
 
                 logger.debug('Started while loop')
 
+                message.refresh_from_db()
+
                 # Get the messages left for the user
                 messages_left = Order.objects.filter(profile=message.profile).count_dm() - DirectMessage.objects.filter(profile=message.profile).count_sent()
 
                 # Check to see if we are to stop messaging
-                if self.stop_messaging(event, message, messages_left):
+                if self.stop_messaging(message, messages_left):
                     logger.debug('Loop was broken by stop_messaging')
                     break
 
-                # Check to see if messages have been sent to all members or continue
-                if members is None:
-                    members = [i for i in self.driver.find_elements_by_css_selector('div.member-3-YXUe') if i.text.find('BOT')==-1]
-                    if len(members) <= len(sent):
-                        logger.debug('Members on page are less than members already sent to')
-                        break
+                # Get the names found
+                usernames += self.get_members_names(members=members)
+                usernames = list(set(usernames))
 
-                logger.debug(f'Scraped members {len(members)}')
-                logger.debug(f'Scraped users {len(sent)}')
+                # Remove the blacklisted usernames from the usernames list
+                if blacklisted:
+                    logger.debug(f'Blacklisted {len(usernames)}')
+                    for i in usernames:
+                        if i in blacklisted:
+                            usernames.remove(i)
+
+                members = None
+
+                # Get the names that hasn't been sent messages
+                unique = set(sent).symmetric_difference(set(usernames))
+
+                logger.debug(f'Usernames {len(usernames)}')
+                logger.debug(f'Sent {len(sent)}')
+                logger.debug(f'Unique names {len(unique)}')
+
+                if len(unique) == 0:
+                    completed = False
+                else:
+                    # Loop through all unique names
+                    for username in unique:
+
+                        message.refresh_from_db()
+                        
+                        # Check to see if we are to stop messaging
+                        if self.stop_messaging(message, messages_left):
+                            completed = False
+                            logger.debug('For Loop was broken completely by stop_messaging')
+                            break
+                        # Checking ends =================================
 
 
-                # Loop through all found members
-                for i in members:
-                    
-                    # Making checks before trying to find users ====
-
-                    # Check to see if we are to stop messaging
-                    if self.stop_messaging(event, message, messages_left):
-                        completed = False
-                        logger.debug('For Loop was broken completely by stop_messaging')
-                        break
-
-                    # Checking ends =================================
-
-
-
+<<<<<<< HEAD
                     # Getting the general username
                     try:
                         logger.debug('Trying to find a name again')
@@ -418,11 +587,17 @@ class Driver:
                         members = None
                         break
                     # End of getting general username ================
+=======
+                        # Find the user with quick search
+                        # create action chain object
+                        action = ActionChains(self.driver)
+                         
+                        # perform the operation
+                        action.key_down(Keys.CONTROL).send_keys('k').key_up(Keys.CONTROL).perform()
+>>>>>>> localsend
 
-                    # Test if name is available, if user hasn't been processed before and if user is not a BOT
-                    if name and (name not in sent) and (name.find('BOT')==-1):
-                        # Click the member to send a message and get details
                         try:
+<<<<<<< HEAD
                             i.click()
                         except ElementClickInterceptedException as e:
                             logger.debug(f'Before --> The window size: {self.driver.get_window_size()}')
@@ -452,13 +627,82 @@ class Driver:
                         # logger.debug(f'Found {len(layers)} divs')
                         # for layer in layers:
                         #     logger.debug(f'\n\n{layer.get_attribute("innerHTML")}\n\n')
+=======
+                            WebDriverWait(self.driver, 15).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.quickswitcher-3JagVE > input.input-2VB9rf")))
+>>>>>>> localsend
 
-                        real_name = self.find_webelement(wait_time=1, count=20, find_function=self.driver.find_element_by_css_selector, selector='div.nameTag-m8r81H')
-                        if real_name is not None:
-                            name_data = real_name.text
-
-                            logger.debug(f'Found a new name {name_data}')
+                            inputx = self.driver.find_element_by_css_selector("div.quickswitcher-3JagVE > input.input-2VB9rf")
                             
+                            logger.debug(f'Trying to send this username {username}')
+
+                            self.quicksearch_input().send_keys(username)
+
+                            logger.debug(f'Sent this username {username}')
+
+                            # Check if there were results in the quicksearch
+                            selector_xc3 = 'div.modal-3c3bKg div.scroller-zPkAnE div.contentDefault-16dKSY div.name-2NBmhj span.username-2hHyRL'
+                            names_results = self.driver.find_elements_by_css_selector(selector_xc3)
+
+                            if len(names_results) > 0:
+                                name_data = names_results[0].text
+                                logger.debug(f'A result was found and the real name is {name_data}')
+                                self.quicksearch_input().send_keys(Keys.ENTER)
+                            else:
+                                # No results
+                                # Check is username as been searched before
+                                if quicksearched.count(username) > 0:
+                                    # Add to blacklisted list to make sure we don't try sending to this user again
+                                    blacklisted.append(username)
+
+                                quicksearched.append(username)
+
+                                # Close quicksearch modal
+                                self.close_element_modal(class_names=['.backdrop-1wrmKB'])
+                                continue
+
+                            wait = WebDriverWait(self.driver, 10)
+                            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".cursorPointer-1j7DL8"))) 
+
+                            # Sending messages
+                            inputx = self.driver.find_element_by_css_selector("div.textArea-12jD-V.textAreaSlate-1ZzRVj.slateContainer-3Qkn2x > div.markup-2BOw-j.slateTextArea-1Mkdgw.fontSize16Padding-3Wk7zP > div")
+                            
+                            try:
+                                inputx.click()
+                            except ElementClickInterceptedException as e:
+                                err_logger.exception(e)
+                                
+                                # Try to close some possible interacting elements
+                                self.close_element_modal(class_names=['.backdrop-1wrmKB'])
+
+                                # Try click input again
+                                logger.debug('Trying to click input element again')
+                                inputx.click()
+                            except StaleElementReferenceException as e:
+                                err_logger.exception(e)
+
+                                # SKip this loop here
+                                logger.debug('Skipped loop')
+                                continue
+
+                            # inputx.send_keys(message_text + Keys.ENTER)
+                            sent_message = self.try_to_send_message(message_text)
+
+                            if sent_message is None:
+                                logger.debug(f'Tried sending a message but did not work for {username}')
+                                continue
+
+                            # Add user to the sent list
+                            logger.debug('Message sent to ' + username)
+                            sent.append(username)
+                            
+                            # Update the message sent
+                            message.sent = message.sent + 1
+                            message.save()
+
+                            # Send message through websocket to update user
+                            send_channel_message(user_name, message='', mtype='message_update', count = 1)
+                            
+                            # Create new name
                             if name_data not in created:
                                 # Save or get the new user as a member
                                 user_mem, _ = Member.objects.get_or_create(username=name_data, discord_server=discord)
@@ -466,92 +710,69 @@ class Driver:
                             
                                 # Get user image
                                 try:
-                                    image = self.driver.find_element_by_css_selector('div.avatar-37jOim > svg > foreignObject > div > img')
+                                    image = self.driver.find_element_by_css_selector('.avatarStack-2Dr8S9 img')
                                     image = image.get_attribute("src")
                                     user_mem.image = image
                                 except NoSuchElementException as e:
                                     pass
                                 
-                                # Get Roles
-                                try:
-                                    roles = self.driver.find_elements_by_css_selector('div.role-2irmRk > div.roleName-32vpEy')
-                                    role_text = ', '.join([i.text for i in roles])
-                                    user_mem.roles = role_text
-                                except NoSuchElementException as e:
-                                    pass
-                                
                                 user_mem.save()
                                 logger.debug(f'Created or got a new name {name_data}')
+
+                            # Try to close some possible interacting elements
+                            # Possible element here is the profile modal box
+                            self.close_element_modal(class_names=['.backdrop-1wrmKB'])
                             
-
-                            # Sending a message to this user ===========
-                            
-                            # Find message box
-                            try:
-                                inputElement = self.driver.find_element_by_css_selector('div.footer-3UKYOU > div > input')
-                            except NoSuchElementException as e:
-                                # If the input box wasn't found add the user to sent and continue
-                                sent.append(name)
-                                real_names.append(name_data)
-                                continue
+                            # If blacklist users option is selected
+                            if message.blacklist_users:
+                                # Delete user from server members and add to selected blacklist
+                                member = discord.member_set.get(username = name_data)
+                                member.delete()
+                                blacklist.blacklist_set.create(username=member.username)
 
 
-                            inputElement.send_keys(message_text)
-                            inputElement.send_keys(Keys.ENTER)
-                            
+                            # Wait for the time delay
+                            delay = message.delay
+                            # **********Remove this when in production 3@3
+                            delay = 10
+                            # ****************************************
+                            logger.debug(f'slept for {delay}')
+                            time.sleep(delay)
 
-                            # Wait for the message to send ===========
-                            messages = self.find_webelement(wait_time=1, count=20, find_function=self.driver.find_elements_by_css_selector, selector='.messageContent-2qWWxC', is_list=True)
+                        except (WebDriverException, TimeoutException) as e:
+                            logger.info('Timeout or WebDriverException exception gotten')
+                            err_logger.exception(e)
+                            continue
+                    
+                    # Visit main page and scroll down
+                    self.driver.get(server_rel_link)
 
-                            if messages:
-                                # Add user to the sent list
-                                logger.debug('Message sent to ' + name_data)
-                                sent.append(name)
-                                real_names.append(name_data)
-                                
-                                # Update the message sent
-                                message.sent = message.sent + 1
-                                message.save()
+                    try:
+                        # Wait for page to load
+                        wait = WebDriverWait(self.driver, 200)
+                        wait.until(EC.invisibility_of_element_located((By.CSS_SELECTOR, ".ready-36e6Vk"))) 
 
-                                # Send message through websocket to update user
-                                send_channel_message(user_name, message='', mtype='message_update', count = 1)
-
-                                # If blacklist users option is selected
-                                if message.blacklist_users:
-                                    # Delete user from server members and add to selected blacklist
-                                    member = discord.member_set.get(username = name_data)
-                                    member.delete()
-                                    blacklist.blacklist_set.create(username=member.username)
-
-
-                                # Wait for the time delay
-                                delay = message.delay
-                                # **********Remove this when in production 3@3
-                                delay = 1
-                                # ****************************************
-                                time.sleep(delay)
-                            else:
-                                logger.debug('No messages was found here')
-
-                            self.driver.back()
-                            # End of sending message to user ==========
+                        # Get members
+                        members = self.get_members()
+                        
+                        self.driver.execute_script(f"document.querySelector('.members-1998pB.thin-1ybCId.scrollerBase-289Jih').scrollTop = {scroll_by * scroll_count}") 
+                        scroll_count += 1
+                    except TimeoutException as e:
+                        logger.info('Timeout exception gotten while going back to main server page')
+                        err_logger.exception(e)
 
 
-                else:
-                    logger.debug('Finished a loop or members')
-                    members = None
-            
-            logger.debug(f'Sent messages to {len(set(sent))} members and Created {len(set(created))} members')
-
+            logger.debug(f'Sent messages to {len(sent)} members')
             
             # Update message model and Send completed message to websocket that it is completed
             return self.end_message(message, 'Completed sending messages')
 
         except Exception as e:
             err_logger.exception(e)
-            return self.end_message(message,'Completed sending messages')
+            return self.end_message(message,'Stopped sending messages')
 
         return True
+
 
     def quit(self):
         try:
