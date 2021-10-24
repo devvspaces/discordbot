@@ -61,14 +61,14 @@ class Driver:
         prefs = {"profile.managed_default_content_settings.images": 2}
         chrome_options.add_experimental_option("prefs", prefs)
         
-        chrome_options.add_argument("--disable-infobars")
+        # chrome_options.add_argument("--disable-infobars")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--start-maximized")
         chrome_options.add_argument("--headless")
         chrome_options.add_argument('--window-size=1920x1080')
         chrome_options.add_argument('--start-fullscreen')
-        chrome_options.add_argument("--disable-extensions")
+        # chrome_options.add_argument("--disable-extensions")
         # chrome_options.add_argument("--disable-native-events")
 
         driver = webdriver.Chrome(options=chrome_options)
@@ -150,29 +150,6 @@ class Driver:
         
         return invalid
 
-    # def check_app_redirect(self):
-    #     # To check if the invite is expired
-    #     check = False
-
-    #     logger.debug('Got here')
-
-    #     # Invalid titles
-    #     invalid_titles = ['Discord App Launched']
-
-    #     # First check if the invite is already expired
-    #     invalid_title = self.find_webelement(wait_time = 1, count = 5, find_function=self.driver.find_element_by_css_selector, selector="h3.title-jXR8lp")
-        
-    #     try:
-    #         if invalid_title is not None:
-    #             logger.debug(f'Checked for redirect: {invalid_title.text.lower()}')
-    #             if invalid_title.text.lower() in [i.lower() for i in invalid_titles]:
-    #                 check = True
-    #     except StaleElementReferenceException:
-    #         logger.debug('Went stale while checking for redirect')
-    #         return self.check_app_redirect()
-        
-    #     return check
-
     def check_app_redirect(self):
         # To check if the invite is expired
         check = False
@@ -228,7 +205,14 @@ class Driver:
         except Exception as e:
             self.working = False
             err_logger.exception(e)
+
+            # Quitting
+            self.quit()
+
             return
+
+        # Quitting
+        self.quit()
 
         return online_members
 
@@ -257,8 +241,12 @@ class Driver:
             self.working = False
         except Exception as e:
             self.working = False
+            self.quit()
             err_logger.exception(e)
             return
+
+        # Quitting
+        self.quit()
 
         return True
     
@@ -712,12 +700,19 @@ class Driver:
 
 
             logger.debug(f'Sent messages to {len(sent)} members')
+
+            self.quit()
             
             # Update message model and Send completed message to websocket that it is completed
             return self.end_message(message, 'Completed sending messages')
 
         except Exception as e:
             err_logger.exception(e)
+
+            # Quitting here
+            self.quit()
+            # Quitting here
+
             return self.end_message(message,'Stopped sending messages')
 
         return True
@@ -726,7 +721,6 @@ class Driver:
     def quit(self):
         try:
             self.driver.quit()
-            del self.driver
 
             # Reduce the account use if driver is logged in to an account
             if self.is_authenticated:
@@ -740,6 +734,7 @@ class Driver:
                 self.proxy.save()
             
             logger.debug('Deleted the driver')
+            del self.driver
         except Exception as e:
             print(e)
 
