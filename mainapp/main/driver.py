@@ -86,6 +86,8 @@ class Driver:
         self.event = None
 
         self.invalid_text = ['Unable to accept invite', 'Invite invalid']
+
+        self.destroyed = False
         
         logger.debug('Created driver now')
         # self.driver.set_window_size(1920, 1080)
@@ -732,9 +734,11 @@ class Driver:
             if self.proxy:
                 self.proxy.use_count = self.proxy.use_count-1
                 self.proxy.save()
+
+            # Set to destroyed
+            self.destroyed = True
             
             logger.debug('Deleted the driver')
-            del self.driver
         except Exception as e:
             print(e)
 

@@ -236,7 +236,10 @@ class DmPanel(LoginRequiredMixin, TemplateView, AjaxResponders):
     def get_driver(self):
         driver_instance = None
         for i in drivers:
-            if i.working == False:
+            if i.destroyed:
+                drivers.remove(i)
+
+            elif i.working == False:
                 driver_instance = i
                 break
 

@@ -33,4 +33,17 @@ class Person:
 
 
 p = Person('Ayomide')
-p.call()
+
+
+g = []
+
+g.append(p)
+
+del p
+
+print(g)
+
+for i in g:
+    del i
+
+print(g)
